@@ -375,7 +375,7 @@ function tagStyle(pay){
   return "color:#f5a623;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25)";
 }
 
-async function sendWA(){
+function resetManual(){if(!confirm("Reset semua pesanan?"))return;dbWrite(null);if(timerInterval){clearInterval(timerInterval);timerInterval=null;resetAt=null;}ORDERS=[];updateBadge();renderRekap([]);const box=document.getElementById("timer-box");if(box){box.textContent="⏳ Timer belum mulai";box.style.color="#555";box.style.borderColor="#2a2a2a";}alert("✅ Reset berhasil!");} async function sendWA(){
   if(!ORDERS.length){alert("Belum ada pesanan!");return;}
   let txt=`📋 *REKAP PESANAN JASTIP*\n📅 ${new Date().toLocaleDateString("id-ID")} | ⏰ ${now()}\n👥 Total: ${ORDERS.length} orang\n━━━━━━━━━━━━━━━\n`;
   let g=0;
