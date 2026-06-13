@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Jastip — Event Kita Kita</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap');
+
+:root {
+  --gold: #F5A623;
+  --bg: #0d0d0d;
+  --card: #181818;
+  --card2: #202020;
+  --border: #2c2c2c;
+  --text: #f0f0f0;
+  --muted: #777;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+/* ── CORE SLIDE ENGINE ── */
+#app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.slide-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Every slide: hidden by default, fills the viewport, scrollable */
+.slide {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 28px 18px 20px;
+  background: var(--bg);
+}
+.slide.active {
+  display: block;
+}
+
+/* ── BOTTOM NAV ── */
+.nav {
+  flex-shrink: 0;
+  background: #111;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  height: 58px;
+}
+.nav-btn {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.nav-btn:not(:disabled):hover { background: var(--gold); color:#000; border-color:var(--gold); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.nav-mid { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.dots { display:flex; gap:5px; }
+.dot {
+  width:6px; height:6px; border-radius:50%;
+  background: var(--border); cursor:pointer; transition: all 0.2s;
+}
+.dot.on { background: var(--gold); width:16px; border-radius:3px; }
+.counter { font-size:12px; color:var(--muted); font-weight:600; }
+
+/* ── PROGRESS BAR ── */
+#prog {
+  position:fixed; top:0; left:0; height:2px;
+  background: var(--gold); transition: width 0.3s;
+  z-index:999;
+}
+
+/* ── SHARED ATOMS ── */
+.gold { color: var(--gold); }
+.tag {
+  display:inline-block;
+  background: var(--gold); color:#000;
+  font-size:10px; font-weight:800;
+  padding:4px 12px; border-radius:4px;
+  letter-spacing:1.5px; text-transform:uppercase;
+}
+.sec-label {
+  font-size:11px; font-weight:800;
+  color: var(--gold); letter-spacing:2px;
+  text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:18px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius:12px; padding:16px;
+}
+
+/* ══════════════════════════════
+   SLIDE 1 — HERO
+══════════════════════════════ */
+.s1-wrap { padding: 20px 0 10px; }
+.s1-orb {
+  position:absolute; top:-40px; right:-40px;
+  width:220px; height:220px;
+  background: radial-gradient(circle, rgba(245,166,35,.16) 0%, transparent 70%);
+  border-radius:50%; pointer-events:none;
+}
+.s1-emoji { font-size:34px; margin-bottom:16px; }
+.s1-eyebrow { margin-bottom:14px; }
+.s1-title {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:54px; font-weight:800;
+  line-height:.92; letter-spacing:-2px;
+  margin-bottom:10px;
+}
+.s1-sub {
+  font-size:14px; font-weight:800;
+  color:var(--gold); letter-spacing:3px;
+  text-transform:uppercase; margin-bottom:16px;
+}
+.s1-desc {
+  font-size:14px; color:#aaa; line-height:1.6;
+  margin-bottom:24px;
+}
+.s1-badges { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
+.badge {
+  background:var(--card2); border:1px solid var(--border);
+  padding:6px 14px; border-radius:20px;
+  font-size:12px; font-weight:600; color:#ccc;
+}
+.s1-meta { font-size:12px; color:var(--muted); border-top:1px solid var(--border); padding-top:14px; }
+.s1-meta span { color:var(--gold); font-weight:600; }
+
+/* ══════════════════════════════
+   SLIDE 2 — MASALAH
+══════════════════════════════ */
+.prob-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.prob-card {
+  background:var(--card); border:1px solid var(--border);
+  border-left:3px solid var(--red);
+  border-radius:12px; padding:14px;
+}
+.prob-icon { font-size:20px; margin-bottom:8px; }
+.prob-title { font-size:13px; font-weight:700; margin-bottom:5px; }
+.prob-desc { font-size:11px; color:var(--muted); line-height:1.5; }
+.alert-bar {
+  background:rgba(245,166,35,.1); border:1px solid rgba(245,166,35,.3);
+  border-radius:10px; padding:12px 14px;
+  font-size:12px; color:var(--gold); font-weight:600;
+  display:flex; align-items:flex-start; gap:8px; line-height:1.5;
+}
+
+/* ══════════════════════════════
+   SLIDE 3 — SOLUSI
+══════════════════════════════ */
+.sol-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.sol-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:14px 10px; text-align:center;
+}
+.sol-icon { font-size:24px; margin-bottom:8px; }
+.sol-title { font-size:11px; font-weight:700; margin-bottom:4px; }
+.sol-desc { font-size:10px; color:var(--muted); line-height:1.4; }
+
+/* ══════════════════════════════
+   SLIDE 4 — CARA KERJA
+══════════════════════════════ */
+.steps { display:flex; flex-direction:column; gap:12px; }
+.step {
+  display:flex; align-items:flex-start; gap:14px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:16px;
+}
+.step-num {
+  width:40px; height:40px; min-width:40px;
+  background:var(--gold); color:#000;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:800;
+}
+.step-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+.step-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+.result-bar {
+  background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3);
+  border-radius:10px; padding:12px 14px; margin-top:14px;
+  font-size:12px; color:var(--green); font-weight:600;
+  display:flex; align-items:flex-start; gap:8px; line-height:1.5;
+}
+
+/* ══════════════════════════════
+   SLIDE 5 — BEFORE VS AFTER
+══════════════════════════════ */
+.vs-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.vs-col { border-radius:12px; overflow:hidden; }
+.vs-head {
+  padding:10px 14px; font-size:11px; font-weight:800;
+  display:flex; align-items:center; gap:6px; letter-spacing:.5px;
+}
+.vs-before .vs-head { background:var(--red); color:#fff; }
+.vs-after  .vs-head { background:var(--green); color:#fff; }
+.vs-body {
+  background:var(--card); border:1px solid var(--border);
+  border-top:none; padding:12px;
+}
+.vs-item {
+  font-size:11px; color:#ccc; line-height:1.5;
+  padding:5px 0; border-bottom:1px solid var(--border);
+  display:flex; align-items:flex-start; gap:6px;
+}
+.vs-item:last-child { border-bottom:none; }
+.xi { color:var(--red); font-weight:800; flex-shrink:0; }
+.ci { color:var(--green); font-weight:800; flex-shrink:0; }
+.vs-bottom {
+  background:rgba(245,166,35,.08); border:1px solid rgba(245,166,35,.25);
+  border-radius:10px; padding:12px 14px; margin-top:12px;
+  font-size:12px; color:var(--gold); font-weight:600; text-align:center; line-height:1.5;
+}
+
+/* ══════════════════════════════
+   SLIDE 6 — MANFAAT
+══════════════════════════════ */
+.stat-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+.stat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:14px 8px; text-align:center;
+}
+.stat-icon { font-size:20px; margin-bottom:6px; }
+.stat-num { font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:800; margin-bottom:4px; }
+.stat-label { font-size:10px; color:var(--muted); line-height:1.3; }
+.feat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.feat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:14px;
+}
+.feat-icon { font-size:20px; margin-bottom:8px; }
+.feat-title { font-size:12px; font-weight:700; margin-bottom:4px; }
+.feat-desc { font-size:10px; color:var(--muted); line-height:1.4; }
+
+/* ══════════════════════════════
+   SLIDE 7 — TAMPILAN APP
+══════════════════════════════ */
+.s7-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
+.phone-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.phone-wrap { display:flex; flex-direction:column; gap:8px; }
+.phone-lbl {
+  font-size:11px; font-weight:800; letter-spacing:1px;
+  text-transform:uppercase; text-align:center;
+}
+.lbl-user { color:#60a5fa; }
+.lbl-admin { color:var(--gold); }
+
+.phone {
+  background:#111; border:2px solid #333;
+  border-radius:18px; overflow:hidden;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+.notch {
+  background:#000; height:20px;
+  display:flex; align-items:center; justify-content:center;
+}
+.notch-pill { width:44px; height:7px; background:#1e1e1e; border-radius:4px; }
+
+/* Chat (user) */
+.chat-screen {
+  background:#0f0f0f; padding:8px;
+  display:flex; flex-direction:column; gap:7px;
+}
+.chat-hdr {
+  background:#1a1a1a; border-radius:8px;
+  padding:7px 9px; display:flex; align-items:center; gap:8px; margin-bottom:2px;
+}
+.chat-av {
+  width:26px; height:26px; border-radius:50%;
+  background:var(--gold); display:flex; align-items:center; justify-content:center;
+  font-size:13px;
+}
+.chat-name { font-size:10px; font-weight:700; }
+.chat-status { font-size:9px; color:var(--green); }
+.msg-ai {
+  background:#1e1e1e; border-radius:0 9px 9px 9px;
+  padding:7px 9px; font-size:9.5px; line-height:1.5; color:#ddd;
+  max-width:88%;
+}
+.msg-user {
+  background:var(--gold); border-radius:9px 9px 0 9px;
+  padding:7px 9px; font-size:9.5px; font-weight:700;
+  color:#000; align-self:flex-end; margin-left:auto; max-width:60%;
+}
+.msg-menu {
+  background:#1a1a1a; border:1px solid #2a2a2a;
+  border-radius:9px; padding:7px 9px;
+  font-size:9px; color:#ccc; line-height:1.8; max-width:90%;
+}
+.menu-row { display:flex; justify-content:space-between; gap:6px; }
+.menu-price { color:var(--gold); font-weight:700; }
+
+/* Admin screen */
+.admin-screen { background:#0a0a0a; display:flex; flex-direction:column; }
+.admin-top {
+  background:#1a1a1a; padding:9px 11px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid #222;
+}
+.admin-top-title { font-size:10px; font-weight:800; color:var(--gold); }
+.live-badge {
+  background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.4);
+  color:var(--green); font-size:8px; font-weight:800;
+  padding:2px 6px; border-radius:4px;
+}
+.admin-stats {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:1px; background:#222; border-bottom:1px solid #222;
+}
+.admin-stat { background:#111; padding:7px; text-align:center; }
+.admin-stat-val { font-size:13px; font-weight:800; color:var(--gold); }
+.admin-stat-lbl { font-size:8px; color:var(--muted); }
+.admin-total {
+  background:#151515; padding:7px 11px;
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid #222;
+}
+.admin-total-lbl { font-size:9px; color:var(--muted); }
+.admin-total-val { font-size:12px; font-weight:800; color:var(--gold); }
+.order-list { padding:7px; display:flex; flex-direction:column; gap:5px; }
+.order-item {
+  background:#1a1a1a; border:1px solid #252525;
+  border-radius:7px; padding:7px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.order-name { font-size:10px; font-weight:700; }
+.order-menu-txt { font-size:8.5px; color:var(--muted); margin-top:1px; }
+.pay-badge {
+  font-size:7.5px; font-weight:700; padding:2px 5px;
+  border-radius:3px; margin-bottom:3px; display:block; text-align:right;
+}
+.pay-dana  { background:rgba(96,165,250,.2); color:#60a5fa; }
+.pay-bsi   { background:rgba(34,197,94,.15); color:var(--green); }
+.pay-cash  { background:rgba(245,166,35,.15); color:var(--gold); }
+.order-price { font-size:9.5px; font-weight:800; color:var(--gold); text-align:right; }
+.admin-actions {
+  padding:7px; display:flex; gap:5px;
+  border-top:1px solid #1e1e1e;
+}
+.admin-btn {
+  flex:1; padding:6px; border-radius:6px;
+  font-size:8.5px; font-weight:800; text-align:center;
+}
+.btn-wa   { background:rgba(37,211,102,.15); color:#25D366; border:1px solid rgba(37,211,102,.3); }
+.btn-open { background:rgba(245,166,35,.15); color:var(--gold); border:1px solid rgba(245,166,35,.3); }
+.btn-rst  { background:rgba(239,68,68,.1); color:var(--red); border:1px solid rgba(239,68,68,.25); }
+
+.phone-tags {
+  display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-top:5px;
+}
+.ptag {
+  font-size:9px; font-weight:600; padding:2px 7px;
+  border-radius:10px; background:#1e1e1e; color:#777;
+  border:1px solid #2a2a2a;
+}
+
+/* ══════════════════════════════
+   SLIDE 8 — TERIMA KASIH
+══════════════════════════════ */
+.s8-wrap {
+  min-height: calc(100vh - 58px);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center; padding:40px 20px;
+  position:relative;
+}
+.s8-orb {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:300px; height:300px;
+  background:radial-gradient(circle, rgba(245,166,35,.13) 0%, transparent 65%);
+  border-radius:50%; pointer-events:none;
+}
+.s8-emoji { font-size:46px; margin-bottom:20px; position:relative; }
+.s8-title {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:46px; font-weight:900;
+  line-height:1; margin-bottom:16px;
+  letter-spacing:-2px; position:relative;
+}
+.s8-subtitle {
+  font-size:14px; color:#aaa; line-height:1.7;
+  max-width:300px; margin:0 auto 24px; position:relative;
+}
+.s8-cta {
+  background:var(--gold); color:#000;
+  padding:13px 28px; border-radius:12px;
+  font-size:14px; font-weight:800;
+  display:inline-block; margin-bottom:24px;
+  position:relative;
+}
+.s8-meta {
+  font-size:12px; color:var(--muted);
+  border:1px solid var(--border); border-radius:10px;
+  padding:10px 18px; display:inline-block; position:relative;
+}
+.s8-meta span { color:var(--gold); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<div id="app">
+  <div class="slide-viewport">
+
+    <!-- ══ SLIDE 1: HERO ══ -->
+    <div class="slide active" id="s1">
+      <div class="s1-orb"></div>
+      <div class="s1-wrap">
+        <div class="s1-emoji">🍱🤖</div>
+        <div class="s1-eyebrow"><span class="tag">Inovasi AI</span></div>
+        <div class="s1-title">AI<br><span class="gold">JAS</span>TIP</div>
+        <div class="s1-sub">Makan Siang Otomatis</div>
+        <div class="s1-desc">Solusi cerdas pesan makan siang tanpa repot tanya satu per satu — hemat waktu, hemat tenaga!</div>
+        <div class="s1-badges">
+          <span class="badge">🤖 Chatbot AI</span>
+          <span class="badge">📋 Rekap Otomatis</span>
+          <span class="badge">💳 Multi Bayar</span>
+        </div>
+        <div class="s1-meta">
+          Disusun oleh: <span>Daud General Affair</span> &nbsp;|&nbsp; Event Kita Kita &nbsp;|&nbsp; Juni 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 2: MASALAH ══ -->
+    <div class="slide" id="s2">
+      <div class="sec-label">😤 Masalah Yang Ada Sekarang</div>
+      <div class="prob-grid">
+        <div class="prob-card">
+          <div class="prob-icon">🚶</div>
+          <div class="prob-title">Keliling Satu-Satu</div>
+          <div class="prob-desc">General Affair harus mendatangi setiap meja untuk menanyakan pesanan makan siang, buang waktu & tenaga.</div>
+        </div>
+        <div class="prob-card">
+          <div class="prob-icon">✏️</div>
+          <div class="prob-title">Catat Manual</div>
+          <div class="prob-desc">Pesanan dicatat di kertas atau ingatan, rawan salah, lupa, atau tercampur antara satu orang dan yang lain.</div>
+        </div>
+        <div class="prob-card">
+          <div class="prob-icon">🧮</div>
+          <div class="prob-title">Hitung Manual</div>
+          <div class="prob-desc">Total harga dihitung sendiri dengan kalkulator atau penjumlahan tangan — lambat dan bisa salah.</div>
+        </div>
+        <div class="prob-card">
+          <div class="prob-icon">😤</div>
+          <div class="prob-title">Tidak Efisien</div>
+          <div class="prob-desc">Proses yang berulang setiap hari memakan waktu yang seharusnya bisa digunakan untuk hal lain.</div>
+        </div>
+      </div>
+      <div class="alert-bar" style="margin-top:14px">⚠️ Proses manual ini terjadi SETIAP HARI — sangat tidak efisien dan perlu segera diatasi!</div>
+    </div>
+
+    <!-- ══ SLIDE 3: SOLUSI ══ -->
+    <div class="slide" id="s3">
+      <div class="sec-label">💡 Solusi: AI Jastip Otomatis</div>
+      <div class="sol-grid">
+        <div class="sol-card"><div class="sol-icon">🤖</div><div class="sol-title">Chatbot AI</div><div class="sol-desc">Karyawan cukup chat & pilih menu tanpa GA harus keliling</div></div>
+        <div class="sol-card"><div class="sol-icon">📋</div><div class="sol-title">Menu Digital</div><div class="sol-desc">Daftar menu lengkap dengan harga tampil otomatis dalam chat</div></div>
+        <div class="sol-card"><div class="sol-icon">🧮</div><div class="sol-title">Hitung Otomatis</div><div class="sol-desc">Total tagihan dikalkulasi langsung oleh sistem AI</div></div>
+        <div class="sol-card"><div class="sol-icon">📊</div><div class="sol-title">Rekap Instan</div><div class="sol-desc">Rekap pesanan semua karyawan langsung tersaji rapi</div></div>
+        <div class="sol-card"><div class="sol-icon">💳</div><div class="sol-title">Pilih Pembayaran</div><div class="sol-desc">Dana, BSI, Shopeepay, atau Cash dapat dipilih langsung</div></div>
+        <div class="sol-card"><div class="sol-icon">👥</div><div class="sol-title">Multi Pemesan</div><div class="sol-desc">Bisa terima pesanan dari banyak orang sekaligus</div></div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 4: CARA KERJA ══ -->
+    <div class="slide" id="s4">
+      <div class="sec-label">⚙️ Cara Kerja AI Jastip</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div><div class="step-title">👨‍💼 Karyawan Chat</div><div class="step-desc">Buka aplikasi AI Jastip, masukkan nama, lalu mulai pemesanan</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div><div class="step-title">🛒 Pilih Menu</div><div class="step-desc">AI menampilkan daftar menu & harga, karyawan pilih dengan ketik nomor</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div><div class="step-title">✅ Konfirmasi</div><div class="step-desc">AI tanya jumlah porsi & metode pembayaran, lalu konfirmasi pesanan</div></div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div><div class="step-title">📋 Rekap Otomatis</div><div class="step-desc">Sistem langsung rekap semua pesanan & total harga secara otomatis</div></div>
+        </div>
+      </div>
+      <div class="result-bar">✅ Hasil: General Affair tidak perlu keliling lagi — semua pesanan masuk otomatis, rapi, dan cepat!</div>
+    </div>
+
+    <!-- ══ SLIDE 5: BEFORE VS AFTER ══ -->
+    <div class="slide" id="s5">
+      <div class="sec-label">📊 Sebelum vs Sesudah</div>
+      <div class="vs-grid">
+        <div class="vs-col vs-before">
+          <div class="vs-head">✕ SEBELUM (Manual)</div>
+          <div class="vs-body">
+            <div class="vs-item"><span class="xi">✕</span>GA keliling tanya satu per satu</div>
+            <div class="vs-item"><span class="xi">✕</span>Catat pesanan di kertas / ingatan</div>
+            <div class="vs-item"><span class="xi">✕</span>Hitung total harga manual</div>
+            <div class="vs-item"><span class="xi">✕</span>Rawan salah & lupa pesanan</div>
+            <div class="vs-item"><span class="xi">✕</span>Buang waktu ±30 menit/hari</div>
+          </div>
+        </div>
+        <div class="vs-col vs-after">
+          <div class="vs-head">✓ SESUDAH (AI Jastip)</div>
+          <div class="vs-body">
+            <div class="vs-item"><span class="ci">✓</span>Karyawan pesan sendiri via chatbot</div>
+            <div class="vs-item"><span class="ci">✓</span>Sistem AI catat otomatis & rapi</div>
+            <div class="vs-item"><span class="ci">✓</span>Harga dikalkulasi otomatis</div>
+            <div class="vs-item"><span class="ci">✓</span>Akurat 100%, tidak ada yang terlewat</div>
+            <div class="vs-item"><span class="ci">✓</span>Selesai dalam hitungan menit</div>
+          </div>
+        </div>
+      </div>
+      <div class="vs-bottom">AI Jastip menghemat waktu, mengurangi kesalahan, dan meningkatkan profesionalisme kerja!</div>
+    </div>
+
+    <!-- ══ SLIDE 6: MANFAAT ══ -->
+    <div class="slide" id="s6">
+      <div class="sec-label">🌟 Manfaat Bagi Perusahaan</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-num gold">30 Mnt</div><div class="stat-label">Waktu dihemat per hari</div></div>
+        <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-num" style="color:var(--green)">100%</div><div class="stat-label">Akurasi pencatatan pesanan</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num" style="color:#60a5fa">0 Rp</div><div class="stat-label">Biaya tambahan sistem</div></div>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-icon">⚡</div><div class="feat-title">Efisiensi Operasional</div><div class="feat-desc">GA bisa fokus ke tugas lain yang lebih penting karena proses pesan makan sudah otomatis.</div></div>
+        <div class="feat-card"><div class="feat-icon">📱</div><div class="feat-title">Mudah Digunakan</div><div class="feat-desc">Antarmuka chatbot sederhana, semua karyawan bisa langsung pakai tanpa pelatihan khusus.</div></div>
+        <div class="feat-card"><div class="feat-icon">📈</div><div class="feat-title">Skalabel</div><div class="feat-desc">Bisa menampung banyak pemesan sekaligus tanpa GA kewalahan atau ada pesanan terlewat.</div></div>
+        <div class="feat-card"><div class="feat-icon">🔒</div><div class="feat-title">Data Tersimpan</div><div class="feat-desc">Semua rekap tersimpan rapi dan bisa dikirim ke WA kapan saja dengan satu klik.</div></div>
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 7: TAMPILAN APP ══ -->
+    <div class="slide" id="s7">
+      <div class="sec-label">📱 Tampilan Aplikasi AI Jastip</div>
+      <div class="s7-sub">Tampilan nyata yang digunakan — karyawan pesan sendiri, admin pantau semua</div>
+      <div class="phone-grid">
+
+        <!-- USER -->
+        <div class="phone-wrap">
+          <div class="phone-lbl lbl-user">👤 Tampilan User</div>
+          <div class="phone">
+            <div class="notch"><div class="notch-pill"></div></div>
+            <div class="chat-screen">
+              <div class="chat-hdr">
+                <div class="chat-av">🍱</div>
+                <div><div class="chat-name">AI Jastip</div><div class="chat-status">● Online</div></div>
+              </div>
+              <div class="msg-ai">Halo! Boleh aku tau nama kamu dulu? 😊</div>
+              <div class="msg-user">Budi</div>
+              <div class="msg-ai">Hai Budi! 👋 Ini menu hari ini, ketik nomor yang mau dipesan! 👇</div>
+              <div class="msg-menu">
+                <div class="menu-row"><span>1. Nasi 1 Porsi</span><span class="menu-price">Rp 5.000</span></div>
+                <div class="menu-row"><span>4. Ayam Goreng</span><span class="menu-price">Rp 8.000</span></div>
+                <div class="menu-row"><span>17. Naspad Ayam</span><span class="menu-price">Rp 13.000</span></div>
+              </div>
+              <div class="msg-user">17</div>
+              <div class="msg-ai">✅ Naspad Ayam Goreng — Mau berapa porsi?</div>
+            </div>
+          </div>
+          <div class="phone-tags">
+            <span class="ptag">Chat intuitif</span>
+            <span class="ptag">Pilih mudah</span>
+          </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div class="phone-wrap">
+          <div class="phone-lbl lbl-admin">👑 Tampilan Admin</div>
+          <div class="phone">
+            <div class="notch"><div class="notch-pill"></div></div>
+            <div class="admin-screen">
+              <div class="admin-top">
+                <div class="admin-top-title">📋 Rekap Pesanan</div>
+                <div class="live-badge">● LIVE</div>
+              </div>
+              <div class="admin-stats">
+                <div class="admin-stat"><div class="admin-stat-val">3</div><div class="admin-stat-lbl">Pesanan</div></div>
+                <div class="admin-stat"><div class="admin-stat-val" style="color:#fff;font-size:11px">Araa</div><div class="admin-stat-lbl">Terbaru</div></div>
+                <div class="admin-stat"><div class="admin-stat-val" style="color:#888;font-size:10px">07.38</div><div class="admin-stat-lbl">Update</div></div>
+              </div>
+              <div class="admin-total">
+                <div class="admin-total-lbl">💰 Grand Total (3 orang)</div>
+                <div class="admin-total-val">Rp 75.000</div>
+              </div>
+              <div class="order-list">
+                <div class="order-item">
+                  <div><div class="order-name">Daud</div><div class="order-menu-txt">🍱 Pecak Bandeng x1</div></div>
+                  <div><span class="pay-badge pay-dana">DANA</span><div class="order-price">Rp 70.000</div></div>
+                </div>
+                <div class="order-item">
+                  <div><div class="order-name">Araa</div><div class="order-menu-txt">💧 Le Mineral x1</div></div>
+                  <div><span class="pay-badge pay-bsi">BSI</span><div class="order-price">Rp 5.000</div></div>
+                </div>
+                <div class="order-item">
+                  <div><div class="order-name">Budi</div><div class="order-menu-txt">🍗 Naspad Ayam x1</div></div>
+                  <div><span class="pay-badge pay-cash">Cash</span><div class="order-price">Rp 13.000</div></div>
+                </div>
+              </div>
+              <div class="admin-actions">
+                <div class="admin-btn btn-wa">📤 Kirim WA</div>
+                <div class="admin-btn btn-open">🔓 Buka/Tutup</div>
+                <div class="admin-btn btn-rst">🔄 Reset</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-tags">
+            <span class="ptag">Rekap real-time</span>
+            <span class="ptag">Kontrol penuh</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ SLIDE 8: TERIMA KASIH ══ -->
+    <div class="slide" id="s8">
+      <div class="s8-wrap">
+        <div class="s8-orb"></div>
+        <div class="s8-emoji">🍱🤖🎉</div>
+        <div class="s8-title">TERIMA<br><span class="gold">KASIH!</span></div>
+        <div class="s8-subtitle">AI Jastip hadir untuk membuat pekerjaan lebih cerdas, lebih efisien, dan lebih menyenangkan! 🚀</div>
+        <div class="s8-cta">Siap untuk diimplementasikan mulai hari ini!</div>
+        <div class="s8-meta"><span>Daud General Affair</span> &nbsp;|&nbsp; Event Kita Kita &nbsp;|&nbsp; Juni 2026</div>
+      </div>
+    </div>
+
+  </div><!-- /slide-viewport -->
+
+  <!-- NAV -->
+  <div class="nav">
+    <button class="nav-btn" id="btnPrev" onclick="go(-1)" disabled>← Prev</button>
+    <div class="nav-mid">
+      <div class="dots" id="dotRow"></div>
+      <div class="counter" id="ctr">1 / 8</div>
+    </div>
+    <button class="nav-btn" id="btnNext" onclick="go(1)">Next →</button>
+  </div>
+</div><!-- /app -->
+
+<script>
+  const TOTAL = 8;
+  let cur = 1;
+
+  // Build dots
+  const dotRow = document.getElementById('dotRow');
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 1 ? ' on' : '');
+    d.onclick = () => goTo(i);
+    dotRow.appendChild(d);
+  }
+
+  function goTo(n) {
+    // hide current
+    document.getElementById('s' + cur).classList.remove('active');
+    dotRow.children[cur - 1].classList.remove('on');
+    // show new
+    cur = n;
+    const sl = document.getElementById('s' + cur);
+    sl.classList.add('active');
+    sl.scrollTop = 0;
+    dotRow.children[cur - 1].classList.add('on');
+    document.getElementById('ctr').textContent = cur + ' / ' + TOTAL;
+    document.getElementById('btnPrev').disabled = cur === 1;
+    document.getElementById('btnNext').disabled = cur === TOTAL;
+    document.getElementById('prog').style.width = (cur / TOTAL * 100) + '%';
+  }
+
+  function go(dir) {
+    const n = cur + dir;
+    if (n >= 1 && n <= TOTAL) goTo(n);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')  go(-1);
+  });
+
+  // Touch swipe
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive:true});
+  document.addEventListener('touchend', e => {
+    const dx = tx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) go(dx > 0 ? 1 : -1);
+  }, {passive:true});
+
+  // Init
+  document.getElementById('prog').style.width = (1/TOTAL*100) + '%';
+</script>
+</body>
+</html>
