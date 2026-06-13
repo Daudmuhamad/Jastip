@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Jastip – Event Kita Kita</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#0d0d0d;color:#f0ece4;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.tab-nav{width:100%;max-width:520px;display:flex;padding:10px 12px 0;gap:8px;background:#0d0d0d;position:sticky;top:0;z-index:20;}
+.tab-btn{flex:1;padding:9px 0;border-radius:10px 10px 0 0;border:1px solid #2a2a2a;border-bottom:none;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;background:#1e1e1e;color:#555;}
+.tab-btn.active{color:#f5a623;border-color:#f5a623;}
+.page{width:100%;max-width:520px;display:none;flex-direction:column;}
+.page.show{display:flex;}
+.chat-header{padding:14px 16px 0;display:flex;align-items:center;gap:12px;}
+.logo{width:44px;height:44px;background:linear-gradient(135deg,#f5a623,#ff6b35);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+#chat-area{width:100%;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;height:calc(100vh - 210px);}
+.msg{display:flex;}.msg.user{justify-content:flex-end;}
+.bubble{max-width:84%;padding:10px 14px;border-radius:16px;font-size:13.5px;line-height:1.55;}
+.bubble.user{background:#f5a623;color:#000;border-bottom-right-radius:3px;font-weight:600;}
+.bubble.bot{background:#1e1e1e;color:#f0ece4;border:1px solid #2a2a2a;border-bottom-left-radius:3px;}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:14px;padding:12px;width:100%;}
+.mcat{font-weight:800;font-size:11px;color:#f5a623;margin:10px 0 5px;}.mcat:first-child{margin-top:0;}
+.mitem{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0;border-bottom:1px solid #222;}.mitem:last-child{border-bottom:none;}
+.mprice{color:#f5a623;font-weight:700;margin-left:8px;white-space:nowrap;}
+.pay-opt{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1px solid #2a2a2a;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.pay-opt:last-child{margin-bottom:0;}.pay-opt:hover{border-color:#f5a623;}
+.pay-opt.dipilih{border-color:#f5a623;background:rgba(245,166,35,.08);}.pay-opt.blur{opacity:.3;pointer-events:none;}
+.ritem{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px solid #222;}.ritem:last-child{border-bottom:none;}
+.rtotal{display:flex;justify-content:space-between;font-weight:800;font-size:14px;color:#f5a623;margin-top:9px;}
+.rpay{margin-top:8px;background:rgba(76,175,130,.1);border:1px solid rgba(76,175,130,.25);border-radius:8px;padding:7px 11px;font-size:12px;color:#4caf82;}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;padding:11px;border-radius:10px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;font-size:13px;font-weight:700;text-decoration:none;}
+.wa-btn svg{width:17px;height:17px;fill:#fff;flex-shrink:0;}
+.qr-row{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 6px;width:100%;max-width:520px;}
+.qr-btn{background:#1e1e1e;border:1px solid #2a2a2a;color:#f0ece4;padding:8px 14px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;}
+.qr-btn:hover{border-color:#f5a623;color:#f5a623;}
+.input-row{width:100%;max-width:520px;padding:8px 14px 16px;display:flex;gap:8px;align-items:center;}
+#user-input{flex:1;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:22px;padding:11px 16px;color:#f0ece4;font-family:inherit;font-size:13px;outline:none;}
+#user-input:focus{border-color:#f5a623;}#user-input::placeholder{color:#444;}
+.send-btn{width:42px;height:42px;background:linear-gradient(135deg,#f5a623,#ff6b35);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rekap-page{width:100%;padding:14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;height:calc(100vh - 100px);}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:11px;text-align:center;}
+.grand-box{background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(255,107,53,.07));border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;}
+.action-row{display:flex;gap:8px;}
+.btn-wa{flex:1;padding:11px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;}
+.timer-box{flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;text-align:center;font-size:12px;color:#555;font-weight:600;transition:all .3s;}
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;}
+.f-btn{background:#1a1a1a;border:1px solid #2a2a2a;color:#555;padding:5px 12px;border-radius:16px;font-size:11.5px;cursor:pointer;font-family:inherit;}
+.f-btn.on{border-color:#f5a623;color:#f5a623;}
+.order-card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:13px;margin-bottom:10px;}
+.nbadge{width:24px;height:24px;background:#f5a623;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.pay-tag{font-size:11px;padding:3px 10px;border-radius:16px;font-weight:600;}
+.empty{text-align:center;padding:50px 20px;color:#444;}
+.spinner{text-align:center;padding:30px;color:#555;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-chat" onclick="showTab('chat')">🍱 Pesan Makan</button>
+  <button class="tab-btn" id="tab-rekap" onclick="showTab('rekap')">📋 Rekap</button>
+</div>
+
+<div class="page show" id="page-chat">
+  <div class="chat-header">
+    <div class="logo">🍱</div>
+    <div>
+      <div style="font-weight:800;font-size:17px;">AI Jastip</div>
+      <div style="font-size:11px;color:#555;">🟢 Event Kita Kita • Online</div>
+    </div>
+  </div>
+  <div id="chat-area"></div>
+  <div class="qr-row" id="qr-row"></div>
+  <div class="input-row">
+    <input type="text" id="user-input" placeholder="Ketik nama / nomor menu..." autocomplete="off"/>
+    <button class="send-btn" onclick="kirim()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="page" id="page-rekap">
+  <div class="rekap-page">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:40px;height:40px;background:linear-gradient(135deg,#f5a623,#ff6b35);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">📋</div>
+      <div>
+        <div style="font-weight:800;font-size:17px;">Rekap Pesanan</div>
+        <div style="font-size:11px;color:#555;">🟢 AI Jastip – Event Kita Kita</div>
+      </div>
+      <button onclick="loadRekap()" style="margin-left:auto;background:#1a1a1a;border:1px solid #2a2a2a;color:#888;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;">🔄</button>
+    </div>
+    <div class="stat-grid" id="stat-grid">
+      <div class="stat-box"><div style="font-weight:800;font-size:22px;color:#f5a623">—</div><div style="font-size:10px;color:#555;margin-top:2px">Pesanan</div></div>
+      <div class="stat-box"><div style="font-weight:800;font-size:16px;color:#4caf82">—</div><div style="font-size:10px;color:#555;margin-top:2px">Terbaru</div></div>
+      <div class="stat-box"><div style="font-weight:800;font-size:12px;color:#f0ece4">—</div><div style="font-size:10px;color:#555;margin-top:2px">Update</div></div>
+    </div>
+    <div class="grand-box" id="grand-box">
+      <div style="font-size:12px;color:#666">💰 Grand Total</div>
+      <div style="font-weight:800;font-size:20px;color:#f5a623">Rp 0</div>
+    </div>
+    <div class="action-row">
+      <button class="btn-wa" onclick="sendWA()">📤 Kirim ke WA</button>
+      <div class="timer-box" id="timer-box">⏳ Timer belum mulai</div>
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+    <div id="order-list"><div class="spinner">⏳ Memuat pesanan...</div></div>
+  </div>
+</div>
+
+<script>
+// ══ SHEETDB CONFIG ══
+const BIN_ID    = "6a258104da38895dfe950ac6";
+const API_KEY   = "$2a$10$78GTgydnLiE2xrHmBBoRiuDTefVum5A/r1tYSh0hmhuh52RVeRuAe";
+const BIN_URL   = "https://api.jsonbin.io/v3/b/" + BIN_ID;
+const DURASI    = 60 * 60 * 1000; // 60 menit
+const WA_ADMIN  = "6287820645680";
+
+// ══ DATA MENU (UPDATED) ══
+const KATEGORI = [
+  {nama:"🍚 WARTEG",items:[
+    {id:1, nama:"Nasi 1 Porsi",        harga:5000, emoji:"🍚"},
+    {id:2, nama:"Nasi 1/2 Porsi",      harga:3000, emoji:"🍚"},
+    {id:3, nama:"Ikan Tongkol",         harga:5000, emoji:"🐟"},
+    {id:4, nama:"Ayam Goreng",          harga:8000, emoji:"🍗"},
+    {id:5, nama:"Kikil",                harga:5000, emoji:"🥩"},
+    {id:6, nama:"Usus",                 harga:5000, emoji:"🍢"},
+    {id:7, nama:"Orek Manis",           harga:5000, emoji:"🫙"},
+    {id:8, nama:"Orek Balado",          harga:5000, emoji:"🌶️"},
+    {id:9, nama:"Kentang Balado",       harga:5000, emoji:"🥔"},
+    {id:10,nama:"Tahu Udang",           harga:5000, emoji:"🧆"},
+    {id:11,nama:"Kentang Mustofa",      harga:5000, emoji:"🥔"},
+  ]},
+  {nama:"🥬 SAYUR",items:[
+    {id:12,nama:"Sayur Bayam",          harga:5000, emoji:"🥬"},
+    {id:13,nama:"Sayur Sop",            harga:5000, emoji:"🥣"},
+    {id:14,nama:"Sayur Kangkung",       harga:5000, emoji:"🥬"},
+    {id:15,nama:"Sayur Capcay",         harga:5000, emoji:"🥦"},
+    {id:16,nama:"Sayur Tahu Toge",      harga:5000, emoji:"🌱"},
+  ]},
+  {nama:"🍱 NASPAD",items:[
+    {id:17,nama:"Naspad Ayam Goreng",      harga:13000,emoji:"🍗"},
+    {id:18,nama:"Naspad Ayam Bakar",       harga:13000,emoji:"🔥"},
+    {id:19,nama:"Naspad Ayam Cabe Ijo",    harga:13000,emoji:"🌿"},
+    {id:20,nama:"Naspad Ayam Cabe Merah",  harga:13000,emoji:"🌶️"},
+    {id:21,nama:"Naspad Rendang",          harga:13000,emoji:"🥩"},
+    {id:22,nama:"Naspad Ikan Kembung Bakar",  harga:13000,emoji:"🐟"},
+    {id:23,nama:"Naspad Ikan Kembung Balado", harga:13000,emoji:"🐠"},
+  ]},
+  {nama:"🍜 MENU LAINNYA",items:[
+    {id:24,nama:"Mie Ayam",             harga:13000,emoji:"🍜"},
+    {id:25,nama:"Bakso",                harga:15000,emoji:"🍡"},
+    {id:26,nama:"Pecak Bandeng",        harga:70000,emoji:"🐟"},
+    {id:27,nama:"Gado-Gado",            harga:15000,emoji:"🥗"},
+    {id:28,nama:"Ketoprak",             harga:15000,emoji:"🥗"},
+    {id:29,nama:"Karedok",              harga:15000,emoji:"🥗"},
+    {id:30,nama:"Soto Ayam",            harga:15000,emoji:"🍲"},
+    {id:31,nama:"Soto Tangkar/Daging",  harga:20000,emoji:"🍲"},
+  ]},
+  {nama:"🧆 JAJANAN",items:[
+    {id:32,nama:"Pentol (kecil)",           harga:5000, emoji:"🟤"},
+    {id:33,nama:"Pentol (sedang)",          harga:10000,emoji:"🟤"},
+    {id:34,nama:"Pentol (besar)",           harga:15000,emoji:"🟤"},
+    {id:35,nama:"Tahu Crispy (kecil)",      harga:5000, emoji:"🟨"},
+    {id:36,nama:"Otak-Otak Crispy (kecil)", harga:5000, emoji:"🟧"},
+    {id:37,nama:"Tahu + Otak-Otak Crispy",  harga:10000,emoji:"🍘"},
+    {id:38,nama:"Tahu Crispy (besar)",      harga:10000,emoji:"🟨"},
+    {id:39,nama:"Otak-Otak Crispy (besar)", harga:10000,emoji:"🟧"},
+    {id:40,nama:"Cimol (kecil)",            harga:5000, emoji:"⚪"},
+    {id:41,nama:"Cimol (besar)",            harga:10000,emoji:"⚪"},
+    {id:42,nama:"Cilok (kecil)",            harga:5000, emoji:"🔵"},
+    {id:43,nama:"Cilok (besar)",            harga:10000,emoji:"🔵"},
+    {id:44,nama:"Piscok",                   harga:5000, emoji:"🍫"},
+    {id:45,nama:"Combro (kecil)",           harga:5000, emoji:"🟫"},
+    {id:46,nama:"Combro (besar)",           harga:10000,emoji:"🟫"},
+    {id:47,nama:"Combro + Campur Gorengan", harga:10000,emoji:"🍘"},
+    {id:48,nama:"Keripik Slondok",          harga:10000,emoji:"🥨"},
+    {id:49,nama:"Keripik Kuping Gajah",     harga:10000,emoji:"🥨"},
+    {id:50,nama:"Keripik Pedas",            harga:10000,emoji:"🌶️"},
+    {id:51,nama:"Kerupuk Banyak",           harga:5000, emoji:"🥨"},
+    {id:52,nama:"Kerupuk Kaleng",           harga:1000, emoji:"🥨"},
+  ]},
+  {nama:"🥤 MINUMAN",items:[
+    {id:53,nama:"Es Kelapa",        harga:5000, emoji:"🥥"},
+    {id:54,nama:"Kelapa Muda",      harga:12000,emoji:"🥥"},
+    {id:55,nama:"Teh Poci",         harga:5000, emoji:"🍵"},
+    {id:56,nama:"Le Mineral 600ml", harga:5000, emoji:"💧"},
+    {id:57,nama:"Jus Jambu",        harga:5000, emoji:"🧃"},
+    {id:58,nama:"Jus Alpukat",      harga:10000,emoji:"🥑"},
+    {id:59,nama:"Jus Mangga",       harga:10000,emoji:"🥭"},
+    {id:60,nama:"Jus Melon",        harga:10000,emoji:"🍈"},
+    {id:61,nama:"Jus Strawberry",   harga:10000,emoji:"🍓"},
+  ]}
+];
+const ALL_MENU = KATEGORI.flatMap(k=>k.items);
+const BAYAR = [
+  {id:"dana",      icon:"💙",nama:"DANA",      nomor:"087820645680"},
+  {id:"bsi",       icon:"🏦",nama:"BSI",       nomor:"7189556955"},
+  {id:"shopeepay", icon:"🧡",nama:"ShopeePay", nomor:"087820645680"},
+  {id:"cash",      icon:"💵",nama:"Cash",      nomor:null},
+];
+
+// ══ STATE ══
+let step="nama",nama="",pesanan=[],curMenu=null,orderFinal=null,dipilih=null;
+let activeTab="chat",activeFilter="semua";
+let timerInterval=null,resetAt=null;
+let ORDERS=[];
+let isSaving=false;
+
+const fmt=n=>"Rp "+n.toLocaleString("id-ID");
+const now=()=>new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
+
+// ══ JSONBIN API ══
+const HEADERS_READ  = {"X-Master-Key": API_KEY};
+const HEADERS_WRITE = {"Content-Type":"application/json","X-Master-Key": API_KEY};
+
+async function dbRead(){
+  try{
+    const r=await fetch(BIN_URL+"/latest",{headers:HEADERS_READ});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    const rec=j.record||{};
+    return {orders:rec.orders||[], resetAt:rec.resetAt||null};
+  }catch(e){console.error("dbRead:",e);return null;}
+}
+
+async function dbSave(orders, resetAt){
+  try{
+    const r=await fetch(BIN_URL,{
+      method:"PUT",
+      headers:HEADERS_WRITE,
+      body:JSON.stringify({orders, resetAt})
+    });
+    return r.ok;
+  }catch(e){console.error("dbSave:",e);return false;}
+}
+
+async function dbAddOrder(order){
+  try{
+    const data=await dbRead();
+    const orders=(data&&data.orders)||[];
+    const resetAt=(data&&data.resetAt)||null;
+    orders.push(order);
+    return await dbSave(orders, resetAt);
+  }catch(e){console.error("dbAddOrder:",e);return false;}
+}
+
+async function dbSetTimer(newResetAt){
+  try{
+    const data=await dbRead();
+    const orders=(data&&data.orders)||[];
+    return await dbSave(orders, newResetAt);
+  }catch(e){console.error("dbSetTimer:",e);}
+}
+
+async function dbWrite(data){
+  try{
+    return await dbSave([], null);
+  }catch(e){console.error("dbWrite:",e);return false;}
+}
+
+// ══ TIMER ══
+function startCountdown(ts){
+  if(timerInterval) clearInterval(timerInterval);
+  resetAt=ts;
+  timerInterval=setInterval(tickTimer,1000);
+  tickTimer();
+}
+
+function tickTimer(){
+  const sisa=resetAt-Date.now();
+  const box=document.getElementById("timer-box");
+  if(!box) return;
+  if(sisa<=0){
+    clearInterval(timerInterval);timerInterval=null;resetAt=null;
+    ORDERS=[];
+    dbWrite(null);
+    updateBadge();
+    if(activeTab==="rekap") renderRekap([]);
+    box.textContent="✅ Auto-reset selesai";box.style.color="#4caf82";box.style.borderColor="#4caf82";
+    setTimeout(()=>{box.textContent="⏳ Timer belum mulai";box.style.color="#555";box.style.borderColor="#2a2a2a";},3000);
+    return;
+  }
+  const m=Math.floor(sisa/60000),s=Math.floor((sisa%60000)/1000);
+  const pct=sisa/DURASI;
+  const w=pct>.5?"#4caf82":pct>.2?"#f5a623":"#e74c3c";
+  box.style.color=w;box.style.borderColor=w;
+  box.textContent=`🕐 Auto-reset: ${m}:${String(s).padStart(2,"0")}`;
+}
+
+function updateBadge(){
+  document.getElementById("tab-rekap").textContent=ORDERS.length>0?`📋 Rekap (${ORDERS.length})`:"📋 Rekap";
+}
+
+// ══ TAB ══
+function showTab(t){
+  activeTab=t;
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("show"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("page-"+t).classList.add("show");
+  document.getElementById("tab-"+t).classList.add("active");
+  if(t==="rekap") loadRekap();
+}
+
+// ══ LOAD REKAP ══
+async function loadRekap(){
+  document.getElementById("order-list").innerHTML=`<div class="spinner">⏳ Memuat pesanan...</div>`;
+  const data=await dbRead();
+  if(!data){
+    document.getElementById("order-list").innerHTML=`<div class="empty"><div style="font-size:2rem;margin-bottom:8px">⚠️</div><div>Gagal memuat. Coba refresh!</div></div>`;
+    return;
+  }
+  if(data.resetAt && data.resetAt<=Date.now()){
+    await dbWrite({orders:[],resetAt:null});
+    data.orders=[]; data.resetAt=null;
+  }
+  ORDERS=data.orders||[];
+  updateBadge();
+  if(data.resetAt && data.resetAt>Date.now()){
+    startCountdown(data.resetAt);
+  }
+  renderRekap(ORDERS);
+}
+
+function renderRekap(orders){
+  const grand=orders.reduce((s,o)=>s+(o.total||0),0);
+  const last=orders.length?orders[orders.length-1].nama:"—";
+
+  document.getElementById("stat-grid").innerHTML=`
+    <div class="stat-box"><div style="font-weight:800;font-size:22px;color:#f5a623">${orders.length}</div><div style="font-size:10px;color:#555;margin-top:2px">Pesanan</div></div>
+    <div class="stat-box"><div style="font-weight:800;font-size:${last.length>7?11:16}px;color:#4caf82;line-height:1.3">${last}</div><div style="font-size:10px;color:#555;margin-top:2px">Terbaru</div></div>
+    <div class="stat-box"><div style="font-weight:800;font-size:12px;color:#f0ece4">${now()}</div><div style="font-size:10px;color:#555;margin-top:2px">Update</div></div>`;
+
+  document.getElementById("grand-box").innerHTML=`
+    <div style="font-size:12px;color:#666">💰 Grand Total (${orders.length} orang)</div>
+    <div style="font-weight:800;font-size:20px;color:#f5a623">${fmt(grand)}</div>`;
+
+  const fr=document.getElementById("filter-row");fr.innerHTML="";
+  [{k:"semua",l:"Semua"},{k:"dana",l:"💙 DANA"},{k:"bsi",l:"🏦 BSI"},{k:"shopeepay",l:"🧡 ShopeePay"},{k:"cash",l:"💵 Cash"}].forEach(f=>{
+    const b=document.createElement("button");b.className="f-btn"+(activeFilter===f.k?" on":"");
+    b.textContent=f.l;b.onclick=()=>{activeFilter=f.k;renderRekap(ORDERS);};fr.appendChild(b);
+  });
+
+  const filtered=activeFilter==="semua"?orders:orders.filter(o=>{
+    const p=o.payment.toLowerCase();
+    if(activeFilter==="dana") return p.includes("dana");
+    if(activeFilter==="bsi")  return p.includes("bsi");
+    if(activeFilter==="shopeepay") return p.includes("shopeepay");
+    return !p.includes("dana")&&!p.includes("bsi")&&!p.includes("shopeepay");
+  });
+
+  const list=document.getElementById("order-list");
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div style="font-size:2.5rem;margin-bottom:10px">🍱</div><div style="font-weight:600;font-size:14px">Belum ada pesanan</div><div style="font-size:11px;margin-top:4px;color:#555">Pesanan dari tab 🍱 akan muncul di sini</div></div>`;
+    return;
+  }
+  list.innerHTML=filtered.map((o,i)=>`
+    <div class="order-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+        <div style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px">
+          <div class="nbadge">${i+1}</div>${o.nama}</div>
+        <span style="font-size:10px;color:#444">⏰ ${o.waktu}</span>
+      </div>
+      ${o.pesanan.map(p=>`<div class="ritem"><span style="color:#888">${p.menu.emoji} ${p.menu.nama} x${p.qty}</span><span style="font-weight:600">${fmt(p.menu.harga*p.qty)}</span></div>`).join("")}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span class="pay-tag" style="${tagStyle(o.payment)}">${o.payment}</span>
+        <span style="font-weight:800;font-size:15px;color:#f5a623">${fmt(o.total)}</span>
+      </div></div>`).join("");
+}
+
+function tagStyle(pay){
+  const p=pay.toLowerCase();
+  if(p.includes("dana")) return "color:#4da6ff;background:rgba(0,100,255,.12);border:1px solid rgba(0,100,255,.25)";
+  if(p.includes("bsi"))  return "color:#4caf82;background:rgba(76,175,130,.12);border:1px solid rgba(76,175,130,.25)";
+  if(p.includes("shopeepay")) return "color:#ff6b35;background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.25)";
+  return "color:#f5a623;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25)";
+}
+
+async function sendWA(){
+  if(!ORDERS.length){alert("Belum ada pesanan!");return;}
+  let txt=`📋 *REKAP PESANAN JASTIP*\n📅 ${new Date().toLocaleDateString("id-ID")} | ⏰ ${now()}\n👥 Total: ${ORDERS.length} orang\n━━━━━━━━━━━━━━━\n`;
+  let g=0;
+  ORDERS.forEach((o,i)=>{
+    txt+=`\n${i+1}. 👤 *${o.nama}*\n`;
+    o.pesanan.forEach(p=>{txt+=`   ${p.menu.emoji} ${p.menu.nama} x${p.qty} = ${fmt(p.menu.harga*p.qty)}\n`;});
+    txt+=`   💳 ${o.payment} | 💰 *${fmt(o.total)}*\n`;g+=o.total;
+  });
+  txt+=`\n━━━━━━━━━━━━━━━\n🧾 *GRAND TOTAL: ${fmt(g)}*\n━━━━━━━━━━━━━━━\n_AI Jastip – Event Kita Kita_ 🧡`;
+  window.open("https://wa.me/"+WA_ADMIN+"?text="+encodeURIComponent(txt),"_blank");
+}
+
+// ══ CHAT HELPERS ══
+function scrollDown(){const a=document.getElementById("chat-area");setTimeout(()=>a.scrollTop=a.scrollHeight,50);}
+function addBubble(who,html,delay=0){
+  setTimeout(()=>{
+    const a=document.getElementById("chat-area");
+    const d=document.createElement("div");d.className="msg "+who;
+    d.innerHTML=`<div class="bubble ${who}">${html}</div>`;
+    a.appendChild(d);scrollDown();
+  },delay);
+}
+function addEl(el,delay=0){setTimeout(()=>{document.getElementById("chat-area").appendChild(el);scrollDown();},delay);}
+function setQR(opts){
+  const row=document.getElementById("qr-row");row.innerHTML="";
+  opts.forEach(o=>{const b=document.createElement("button");b.className="qr-btn";b.textContent=o;b.onclick=()=>kirim(o);row.appendChild(b);});
+}
+
+// ══ CARDS ══
+function menuCard(){
+  const d=document.createElement("div");d.className="card";
+  let h="";
+  KATEGORI.forEach(k=>{
+    h+=`<div class="mcat">${k.nama}</div>`;
+    k.items.forEach(m=>{h+=`<div class="mitem"><span style="color:#aaa">${m.id}. ${m.emoji} ${m.nama}</span><span class="mprice">${fmt(m.harga)}</span></div>`;});
+  });
+  h+=`<div style="font-size:9px;color:#444;margin-top:8px;text-align:center;">⏰ Batas pesan jam 11.30 WIB</div>`;
+  d.innerHTML=h;return d;
+}
+
+function bayarCard(){
+  const d=document.createElement("div");d.className="card";d.style.maxWidth="320px";d.id="bayar-card";
+  let h=`<div style="font-weight:800;font-size:13px;color:#f5a623;margin-bottom:10px;">💳 Pilih Metode Pembayaran</div>`;
+  BAYAR.forEach(b=>{
+    h+=`<div class="pay-opt" id="popt-${b.id}" onclick="pilihBayar('${b.id}')">
+      <span style="font-size:1.4rem">${b.icon}</span>
+      <div style="flex:1"><div style="font-weight:700;font-size:13px;color:#f0ece4">${b.nama}</div>
+      <div style="font-size:11px;color:#555">${b.nomor||"Bayar ke kasir"}</div></div>
+      <span style="color:#444;font-size:16px">›</span></div>`;
+  });
+  d.innerHTML=h;return d;
+}
+
+function rekapMiniCard(o){
+  const d=document.createElement("div");d.className="card";d.style.maxWidth="320px";
+  const waText=[`🍱 *PESANAN AI JASTIP*`,`👤 *${o.nama}* | ⏰ ${o.waktu}`,`━━━━━━━━━━━━━━━`,
+    ...o.pesanan.map(p=>`${p.menu.emoji} ${p.menu.nama} x${p.qty} = *${fmt(p.menu.harga*p.qty)}*`),
+    `━━━━━━━━━━━━━━━`,`💰 *TOTAL: ${fmt(o.total)}*`,`💳 ${o.payment}`,`_AI Jastip – Event Kita Kita_ 🧡`
+  ].join("\n");
+  const waUrl="https://wa.me/6287820645680?text="+encodeURIComponent(waText);
+  let items=o.pesanan.map(p=>`<div class="ritem"><span style="color:#888">${p.menu.emoji} ${p.menu.nama} x${p.qty}</span><span style="font-weight:600">${fmt(p.menu.harga*p.qty)}</span></div>`).join("");
+  d.innerHTML=`<div style="font-weight:800;font-size:13px;color:#f5a623;margin-bottom:8px">🧾 Rekap Pesanan Kamu</div>
+    <div style="font-size:11px;color:#555;margin-bottom:7px">👤 ${o.nama}</div>${items}
+    <div class="rtotal"><span>Total</span><span>${fmt(o.total)}</span></div>
+    <div class="rpay">💳 ${o.payment}</div>
+    <a href="${waUrl}" target="_blank" class="wa-btn">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Kirim ke WhatsApp Saya</a>`;
+  return d;
+}
+
+// ══ PILIH BAYAR ══
+function pilihBayar(id){
+  if(dipilih||isSaving) return;
+  dipilih=id; isSaving=true;
+  BAYAR.forEach(b=>{
+    const el=document.getElementById("popt-"+b.id);if(!el)return;
+    el.classList.add(b.id===id?"dipilih":"blur");
+  });
+  const b=BAYAR.find(x=>x.id===id);
+  const pay=b.nomor?`${b.nama} (${b.nomor})`:b.nama;
+  const total=pesanan.reduce((s,p)=>s+p.menu.harga*p.qty,0);
+  orderFinal={nama,pesanan:JSON.parse(JSON.stringify(pesanan)),payment:pay,total,waktu:now()};
+
+  addBubble("user",`${b.icon} ${b.nama}`);
+
+  addBubble("bot","✅ Pesanan tersimpan! Ini rekapnya 👇",200);
+  addEl(rekapMiniCard(orderFinal),600);
+  addBubble("bot",`💰 Total: <b>${fmt(total)}</b>`,800);
+  addBubble("bot",`Terima kasih <b>${nama}</b>! 🍱 Silahkan menunggu, pesananmu sedang diproses ya ✨`,1300);
+  addBubble("bot","Mau pesan untuk orang lain, atau sudah selesai?",1900);
+  setTimeout(()=>setQR(["Pesan untuk orang lain","Selesai"]),2000);
+  step="selesai"; isSaving=false;
+
+  (async()=>{
+    await dbAddOrder(orderFinal);
+    ORDERS.push(orderFinal);
+    updateBadge();
+    const data=await dbRead();
+    let newResetAt=data&&data.resetAt&&data.resetAt>Date.now()?data.resetAt:Date.now()+DURASI;
+    await dbSetTimer(newResetAt);
+    if(!timerInterval) startCountdown(newResetAt);
+  })();
+}
+
+// ══ FLOW CHAT ══
+function kirim(v){
+  const val=(v||document.getElementById("user-input").value).trim();
+  if(!val)return;
+  document.getElementById("user-input").value="";setQR([]);
+  addBubble("user",val);
+  setTimeout(()=>proses(val),400);
+}
+
+function proses(val){
+  if(step==="nama"){
+    nama=val;
+    addBubble("bot",`Hai <b>${val}</b>! 👋 Senang ketemu kamu~`);
+    addBubble("bot","Ini daftar menu hari ini, ketik <b>nomor menu</b> yang mau dipesan! 👇",400);
+    addEl(menuCard(),500);
+    setTimeout(()=>setQR(["1","2","17","24","32"]),600);
+    step="menu";return;
+  }
+  if(step==="menu"){
+    const num=parseInt(val),found=ALL_MENU.find(m=>m.id===num);
+    if(!found){addBubble("bot",`Nomor <b>${val}</b> tidak ada 😅 Ketik angka <b>1–61</b> ya!`);setTimeout(()=>setQR(["1","17","24","32"]),300);return;}
+    curMenu=found;
+    addBubble("bot",`Oke! <b>${found.emoji} ${found.nama}</b> — ${fmt(found.harga)} 🎉`);
+    addBubble("bot","Mau pesan berapa porsi / pcs?",400);
+    setTimeout(()=>setQR(["1","2","3"]),500);
+    step="qty";return;
+  }
+  if(step==="qty"){
+    const q=parseInt(val);
+    if(!q||q<1||q>20){addBubble("bot","Ketik angka <b>1–20</b> ya!");setTimeout(()=>setQR(["1","2","3"]),300);return;}
+    pesanan.push({menu:curMenu,qty:q});
+    addBubble("bot",`✅ Ditambah! <b>${curMenu.nama} x${q}</b> = ${fmt(curMenu.harga*q)}`);
+    addBubble("bot","Mau tambah menu lain? 😊",400);
+    setTimeout(()=>setQR(["Ya, tambah lagi","Tidak, lanjut bayar"]),500);
+    step="lagi";return;
+  }
+  if(step==="lagi"){
+    if(val==="Ya, tambah lagi"){
+      addBubble("bot","Oke! Ketik nomor menu lagi ya 👇");
+      addEl(menuCard(),300);
+      setTimeout(()=>setQR(["1","17","24","32"]),400);
+      step="menu";return;
+    }
+    addBubble("bot","Siap! Pilih metode pembayaran di bawah ya 👇");
+    addEl(bayarCard(),500);
+    step="bayar";return;
+  }
+  if(step==="selesai"){
+    if(val==="Pesan untuk orang lain"){
+      nama="";pesanan=[];curMenu=null;orderFinal=null;dipilih=null;
+      addBubble("bot","Oke! Nama pemesan berikutnya siapa? 😊");
+      step="nama";return;
+    }
+    addBubble("bot","Terima kasih sudah memesan! 🙏 Selamat makan siang ya! 🍽️");
+    addBubble("bot","— AI Jastip Event Kita Kita 🧡",500);
+    setTimeout(()=>setQR(["🔄 Pesan lagi"]),600);
+    step="done";return;
+  }
+  if(step==="done"){
+    nama="";pesanan=[];curMenu=null;orderFinal=null;dipilih=null;
+    document.getElementById("chat-area").innerHTML="";
+    addBubble("bot","👋 Halo lagi! Siapa nama kamu? 😊",200);
+    step="nama";return;
+  }
+}
+
+// ══ INIT ══
+document.getElementById("user-input").addEventListener("keydown",e=>{if(e.key==="Enter")kirim();});
+addBubble("bot","👋 Halo! Selamat datang di <b>AI Jastip Event Kita Kita!</b> 🍱",200);
+addBubble("bot","Aku siap bantu catat pesanan makan siang kamu 😄",800);
+addBubble("bot","Boleh aku tau <b>nama kamu</b> dulu? 😊",1400);
+</script>
+</body>
+</html>
