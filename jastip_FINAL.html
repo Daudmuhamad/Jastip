@@ -435,7 +435,7 @@ function rekapMiniCard(o){
     ...o.pesanan.map(p=>`${p.menu.emoji} ${p.menu.nama} x${p.qty} = *${fmt(p.menu.harga*p.qty)}*`),
     `━━━━━━━━━━━━━━━`,`💰 *TOTAL: ${fmt(o.total)}*`,`💳 ${o.payment}`,`_AI Jastip – Event Kita Kita_ 🧡`
   ].join("\n");
-  const waUrl="https://wa.me/?text="+encodeURIComponent(waText);
+  const waUrl="https://wa.me/6287820645680?text="+encodeURIComponent(waText);
   let items=o.pesanan.map(p=>`<div class="ritem"><span style="color:#888">${p.menu.emoji} ${p.menu.nama} x${p.qty}</span><span style="font-weight:600">${fmt(p.menu.harga*p.qty)}</span></div>`).join("");
   d.innerHTML=`<div style="font-weight:800;font-size:13px;color:#f5a623;margin-bottom:8px">🧾 Rekap Pesanan Kamu</div>
     <div style="font-size:11px;color:#555;margin-bottom:7px">👤 ${o.nama}</div>${items}
