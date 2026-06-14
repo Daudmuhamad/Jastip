@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AI Jastip — Pesan Makan Siang</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--gold:#F5A623;--bg:#0d0d0d;--card:#181818;--card2:#202020;--border:#2c2c2c;--text:#f0f0f0;--muted:#777;--green:#22c55e;--red:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow:hidden;}
+.page{display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;}
+.page.active{display:flex;}
+
+/* LOGIN */
+.login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;text-align:center;background:radial-gradient(ellipse at top,rgba(245,166,35,.1) 0%,transparent 60%),var(--bg);overflow-y:auto;}
+.login-logo{font-size:50px;margin-bottom:12px;}
+.login-title{font-size:26px;font-weight:800;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+.login-input{width:100%;max-width:320px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text);font-family:'Inter',sans-serif;margin-bottom:12px;outline:none;}
+.login-input:focus{border-color:var(--gold);}
+.login-btn{width:100%;max-width:320px;background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;}
+.login-btn:active{opacity:.8;}
+
+/* MENU HEADER */
+.menu-header{background:#111;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.menu-av{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.menu-hdr-name{font-size:14px;font-weight:800;}
+.menu-hdr-sub{font-size:11px;color:var(--green);}
+.cart-badge{margin-left:auto;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--gold);font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;}
+
+/* MENU BODY */
+.menu-body{flex:1;overflow-y:auto;padding:12px 12px 4px;}
+.menu-welcome{padding:8px 0 12px;font-size:13px;color:var(--muted);}
+.menu-cat-title{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;padding:10px 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.menu-grid{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.menu-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.menu-item-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.menu-item-price{font-size:12px;color:var(--gold);font-weight:700;}
+.add-btn{width:34px;height:34px;border-radius:50%;background:var(--gold);border:none;color:#000;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.qty-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.qty-num{font-size:13px;font-weight:800;min-width:22px;text-align:center;color:var(--gold);}
+
+/* MENU FOOTER */
+.menu-footer{flex-shrink:0;background:#111;border-top:1px solid var(--border);padding:12px;}
+.checkout-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;}
+.checkout-btn:disabled{opacity:.35;cursor:default;}
+
+/* PAYMENT PAGE */
+.pay-header{background:#111;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.back-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+.pay-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;}
+.sec-title{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.order-summary{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.order-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);gap:10px;}
+.order-row:last-child{border-bottom:none;font-weight:800;color:var(--gold);padding-top:10px;font-size:14px;}
+.order-row span:first-child{color:#ccc;}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pay-method{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .15s;}
+.pay-method.selected{border-color:var(--gold);background:rgba(245,166,35,.08);}
+.pay-method:active{opacity:.8;}
+.pay-method-icon{font-size:26px;margin-bottom:6px;}
+.pay-method-name{font-size:13px;font-weight:700;}
+.confirm-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;}
+.confirm-btn:disabled{opacity:.35;cursor:default;}
+
+/* DONE PAGE */
+.done-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;text-align:center;overflow-y:auto;}
+.done-icon{font-size:60px;margin-bottom:14px;}
+.done-title{font-size:22px;font-weight:800;margin-bottom:6px;}
+.done-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.done-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;width:100%;max-width:340px;margin-bottom:16px;text-align:left;}
+.done-card-title{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+.done-item{font-size:13px;padding:4px 0;display:flex;justify-content:space-between;gap:8px;color:#ccc;}
+.done-total{font-size:14px;font-weight:800;color:var(--gold);padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;margin-top:6px;}
+.done-pay-info{font-size:11px;color:var(--muted);margin-top:6px;}
+.wa-btn{background:#25D366;color:#000;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:10px;width:100%;max-width:340px;}
+.new-order-btn{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;width:100%;max-width:340px;}
+.closed-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:16px;text-align:center;font-size:14px;color:var(--red);font-weight:700;margin:16px 12px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-logo">🍱</div>
+    <div class="login-title">AI <span style="color:var(--gold)">Jastip</span></div>
+    <div class="login-sub">Pesan makan siang otomatis<br>Event Kita Kita</div>
+    <input class="login-input" id="nameInput" placeholder="Masukkan nama kamu..." maxlength="30" onkeydown="if(event.key==='Enter')startOrder()"/>
+    <button class="login-btn" onclick="startOrder()">Lihat Menu & Pesan 🍽️</button>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="page" id="page-menu">
+  <div class="menu-header">
+    <div class="menu-av">🍱</div>
+    <div>
+      <div class="menu-hdr-name">AI Jastip</div>
+      <div class="menu-hdr-sub" id="menuStatus">● Buka — Event Kita Kita</div>
+    </div>
+    <div class="cart-badge" id="cartBadge" onclick="goCheckout()">🛒 0 item</div>
+  </div>
+  <div class="menu-body" id="menuBody"></div>
+  <div class="menu-footer">
+    <button class="checkout-btn" id="checkoutBtn" onclick="goCheckout()" disabled>
+      <span>Lanjut ke Pembayaran</span>
+      <span id="checkoutTotal">Rp 0</span>
+    </button>
+  </div>
+</div>
+
+<!-- PAYMENT -->
+<div class="page" id="page-payment">
+  <div class="pay-header">
+    <button class="back-btn" onclick="showPage('page-menu')">← Kembali</button>
+    <span style="font-size:14px;font-weight:700;margin-left:8px;">Konfirmasi Pesanan</span>
+  </div>
+  <div class="pay-body">
+    <div>
+      <div class="sec-title">📋 Ringkasan Pesanan</div>
+      <div class="order-summary" id="orderSummary"></div>
+    </div>
+    <div>
+      <div class="sec-title">💳 Metode Pembayaran</div>
+      <div class="pay-methods">
+        <div class="pay-method" onclick="selectPay('Dana')" id="pay-Dana"><div class="pay-method-icon">💙</div><div class="pay-method-name">Dana</div></div>
+        <div class="pay-method" onclick="selectPay('BSI')" id="pay-BSI"><div class="pay-method-icon">🟢</div><div class="pay-method-name">BSI</div></div>
+        <div class="pay-method" onclick="selectPay('Shopeepay')" id="pay-Shopeepay"><div class="pay-method-icon">🧡</div><div class="pay-method-name">Shopeepay</div></div>
+        <div class="pay-method" onclick="selectPay('Cash')" id="pay-Cash"><div class="pay-method-icon">💵</div><div class="pay-method-name">Cash</div></div>
+      </div>
+    </div>
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmOrder()" disabled>✅ Konfirmasi Pesanan</button>
+    <div style="height:10px"></div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="page" id="page-done">
+  <div class="done-wrap">
+    <div class="done-icon">🎉</div>
+    <div class="done-title">Pesanan Masuk!</div>
+    <div class="done-sub" id="doneMsg">Pesananmu sudah tercatat!</div>
+    <div class="done-card" id="doneCard"></div>
+    <button class="wa-btn" onclick="kirimWA()">📤 Kirim ke WA Admin</button>
+    <button class="new-order-btn" onclick="newOrder()">← Pesan Lagi</button>
+  </div>
+</div>
+
+<script>
+const ADMIN_WA = '6287820645680';
+
+const MENU = [
+  // Warteg
+  {id:1,  name:"Nasi 1 Porsi",           price:5000,  cat:"🍚 Warteg"},
+  {id:2,  name:"Nasi ½ Porsi",           price:3000,  cat:"🍚 Warteg"},
+  {id:3,  name:"Ikan Tongkol",           price:5000,  cat:"🍚 Warteg"},
+  {id:4,  name:"Ayam Goreng",            price:8000,  cat:"🍚 Warteg"},
+  {id:5,  name:"Kikil",                  price:5000,  cat:"🍚 Warteg"},
+  {id:6,  name:"Usus",                   price:5000,  cat:"🍚 Warteg"},
+  {id:7,  name:"Orek Manis",             price:5000,  cat:"🍚 Warteg"},
+  {id:8,  name:"Orek Balado",            price:5000,  cat:"🍚 Warteg"},
+  {id:9,  name:"Kentang Balado",         price:5000,  cat:"🍚 Warteg"},
+  {id:10, name:"Tahu Udang",             price:5000,  cat:"🍚 Warteg"},
+  {id:11, name:"Kentang Mustofa",        price:5000,  cat:"🍚 Warteg"},
+  {id:12, name:"Sayur Bayam",            price:5000,  cat:"🍚 Warteg"},
+  {id:13, name:"Sayur Sop",              price:5000,  cat:"🍚 Warteg"},
+  {id:14, name:"Sayur Kangkung",         price:5000,  cat:"🍚 Warteg"},
+  {id:15, name:"Sayur Capcay",           price:5000,  cat:"🍚 Warteg"},
+  {id:16, name:"Sayur Tahu Toge",        price:5000,  cat:"🍚 Warteg"},
+  // Naspad
+  {id:17, name:"Naspad Ayam Goreng",     price:13000, cat:"🍛 Naspad"},
+  {id:18, name:"Naspad Ayam Bakar",      price:13000, cat:"🍛 Naspad"},
+  {id:19, name:"Naspad Ayam Cabe Ijo",   price:13000, cat:"🍛 Naspad"},
+  {id:20, name:"Naspad Ayam Cabe Merah", price:13000, cat:"🍛 Naspad"},
+  {id:21, name:"Naspad Rendang",         price:13000, cat:"🍛 Naspad"},
+  {id:22, name:"Naspad Ikan Kembung Bakar",  price:13000, cat:"🍛 Naspad"},
+  {id:23, name:"Naspad Ikan Kembung Balado", price:13000, cat:"🍛 Naspad"},
+  // Menu Lainnya
+  {id:24, name:"Mie Ayam",              price:13000, cat:"🍜 Menu Lainnya"},
+  {id:25, name:"Bakso",                 price:15000, cat:"🍜 Menu Lainnya"},
+  {id:26, name:"Ayam Geprek",           price:12000, cat:"🍜 Menu Lainnya"},
+  {id:27, name:"Fried Chicken",         price:9000,  cat:"🍜 Menu Lainnya"},
+  {id:28, name:"Pecak Bandeng",         price:70000, cat:"🍜 Menu Lainnya"},
+  {id:29, name:"Gado-Gado",             price:15000, cat:"🍜 Menu Lainnya"},
+  {id:30, name:"Ketoprak",              price:15000, cat:"🍜 Menu Lainnya"},
+  {id:31, name:"Karedok",               price:15000, cat:"🍜 Menu Lainnya"},
+  {id:32, name:"Soto Ayam",             price:15000, cat:"🍜 Menu Lainnya"},
+  {id:33, name:"Soto Tangkar/Daging",   price:23000, cat:"🍜 Menu Lainnya"},
+  // Jajanan
+  {id:34, name:"Pentol",                price:5000,  cat:"🍿 Jajanan"},
+  {id:35, name:"Indomie Soto",          price:3000,  cat:"🍿 Jajanan"},
+  {id:36, name:"Indomie Goreng",        price:4000,  cat:"🍿 Jajanan"},
+  {id:37, name:"Tahu Crispy",           price:5000,  cat:"🍿 Jajanan"},
+  {id:38, name:"Otak-Otak Crispy",      price:5000,  cat:"🍿 Jajanan"},
+  {id:39, name:"Tahu+Otak-Otak Crispy", price:10000, cat:"🍿 Jajanan"},
+  {id:40, name:"Tahu Crispy",           price:10000, cat:"🍿 Jajanan"},
+  {id:41, name:"Otak-Otak Crispy",      price:10000, cat:"🍿 Jajanan"},
+  {id:42, name:"Cimol",                 price:5000,  cat:"🍿 Jajanan"},
+  {id:43, name:"Cilok",                 price:5000,  cat:"🍿 Jajanan"},
+  {id:44, name:"Piscok",                price:5000,  cat:"🍿 Jajanan"},
+  {id:45, name:"Combro",                price:5000,  cat:"🍿 Jajanan"},
+  {id:46, name:"Gorengan",              price:5000,  cat:"🍿 Jajanan"},
+  {id:47, name:"Combro+Campur Gorengan",price:10000, cat:"🍿 Jajanan"},
+  {id:48, name:"Keripik Slondok",       price:10000, cat:"🍿 Jajanan"},
+  {id:49, name:"Keripik Kuping Gajah",  price:10000, cat:"🍿 Jajanan"},
+  {id:50, name:"Keripik Pedas",         price:10000, cat:"🍿 Jajanan"},
+  {id:51, name:"Kerupuk Banyak",        price:5000,  cat:"🍿 Jajanan"},
+  {id:52, name:"Kerupuk Kaleng",        price:1000,  cat:"🍿 Jajanan"},
+  // Minuman
+  {id:53, name:"Es Kelapa",             price:5000,  cat:"🥤 Minuman"},
+  {id:54, name:"Kelapa Muda",           price:12000, cat:"🥤 Minuman"},
+  {id:55, name:"Teh Poci",              price:5000,  cat:"🥤 Minuman"},
+  {id:56, name:"Le Mineral 600ml",      price:5000,  cat:"🥤 Minuman"},
+  {id:57, name:"Jus Jambu",             price:5000,  cat:"🥤 Minuman"},
+  {id:58, name:"Jus Mangga",            price:10000, cat:"🥤 Minuman"},
+  {id:59, name:"Jus Melon",             price:10000, cat:"🥤 Minuman"},
+  {id:60, name:"Jus Alpukat",           price:10000, cat:"🥤 Minuman"},
+  {id:61, name:"Jus Strawberry",        price:10000, cat:"🥤 Minuman"},
+  {id:62, name:"Jus Jeruk",             price:5000,  cat:"🥤 Minuman"},
+];
+
+const rp = n => "Rp " + n.toLocaleString('id-ID');
+let userName = '';
+let cart = {};
+let selectedPay = '';
+
+function getIsOpen() {
+  try { const d = JSON.parse(localStorage.getItem('jastip_state') || '{}'); return d.open !== false; } catch(e) { return true; }
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startOrder() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { document.getElementById('nameInput').focus(); return; }
+  userName = name;
+  cart = {};
+  showPage('page-menu');
+  renderMenu();
+}
+
+function renderMenu() {
+  const body = document.getElementById('menuBody');
+  const open = getIsOpen();
+
+  if (!open) {
+    body.innerHTML = '<div class="closed-banner">🔴 Maaf, pemesanan sedang ditutup sementara.<br><br>Silakan tunggu ya! 🙏</div>';
+    document.getElementById('checkoutBtn').disabled = true;
+    document.getElementById('menuStatus').textContent = '● Ditutup';
+    document.getElementById('menuStatus').style.color = 'var(--red)';
+    return;
+  }
+
+  document.getElementById('menuStatus').textContent = '● Buka — Event Kita Kita';
+  document.getElementById('menuStatus').style.color = 'var(--green)';
+
+  const cats = [...new Set(MENU.map(m => m.cat))];
+  let html = `<div class="menu-welcome">Halo <b style="color:var(--text)">${userName}</b>! Pilih menu di bawah ya 😊</div>`;
+
+  cats.forEach(cat => {
+    const items = MENU.filter(m => m.cat === cat);
+    html += `<div class="menu-cat-title">${cat}</div><div class="menu-grid">`;
+    items.forEach(m => {
+      const qty = cart[m.id] || 0;
+      html += `<div class="menu-item">
+        <div style="flex:1;min-width:0;">
+          <div class="menu-item-name">${m.name}</div>
+          <div class="menu-item-price">${rp(m.price)}</div>
+        </div>
+        <div id="ctrl-${m.id}">${renderCtrl(m.id, qty)}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+  updateCartUI();
+}
+
+function renderCtrl(id, qty) {
+  if (qty === 0) {
+    return `<button class="add-btn" onclick="addItem(${id})">+</button>`;
+  }
+  return `<div class="qty-ctrl">
+    <button class="qty-btn" onclick="removeItem(${id})">−</button>
+    <span class="qty-num">${qty}</span>
+    <button class="qty-btn" style="background:var(--gold);color:#000;border-color:var(--gold)" onclick="addItem(${id})">+</button>
+  </div>`;
+}
+
+function addItem(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  const el = document.getElementById('ctrl-' + id);
+  if (el) el.innerHTML = renderCtrl(id, cart[id]);
+  updateCartUI();
+}
+
+function removeItem(id) {
+  if (!cart[id]) return;
+  cart[id]--;
+  if (cart[id] === 0) delete cart[id];
+  const el = document.getElementById('ctrl-' + id);
+  if (el) el.innerHTML = renderCtrl(id, cart[id] || 0);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const ids = Object.keys(cart);
+  const totalQty = ids.reduce((a, id) => a + cart[id], 0);
+  const totalPrice = ids.reduce((a, id) => {
+    const m = MENU.find(x => x.id === parseInt(id));
+    return a + (m ? m.price * cart[id] : 0);
+  }, 0);
+  document.getElementById('cartBadge').textContent = '🛒 ' + totalQty + ' item';
+  document.getElementById('checkoutBtn').disabled = totalQty === 0;
+  document.getElementById('checkoutTotal').textContent = rp(totalPrice);
+}
+
+function goCheckout() {
+  const ids = Object.keys(cart);
+  if (ids.length === 0) return;
+  selectedPay = '';
+  document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+  document.getElementById('confirmBtn').disabled = true;
+
+  let html = '';
+  let total = 0;
+  ids.forEach(id => {
+    const m = MENU.find(x => x.id === parseInt(id));
+    if (!m) return;
+    const sub = m.price * cart[id];
+    total += sub;
+    html += `<div class="order-row"><span>${m.name} x${cart[id]}</span><span style="font-weight:700;color:var(--text)">${rp(sub)}</span></div>`;
+  });
+  html += `<div class="order-row"><span>Total</span><span>${rp(total)}</span></div>`;
+  document.getElementById('orderSummary').innerHTML = html;
+  showPage('page-payment');
+}
+
+function selectPay(method) {
+  selectedPay = method;
+  document.querySelectorAll('.pay-method').forEach(el => el.classList.remove('selected'));
+  document.getElementById('pay-' + method).classList.add('selected');
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+function confirmOrder() {
+  if (!selectedPay) return;
+  const items = Object.keys(cart).map(id => {
+    const m = MENU.find(x => x.id === parseInt(id));
+    return {id:parseInt(id), name:m.name, qty:cart[id], price:m.price};
+  });
+  const total = items.reduce((a,i) => a + i.price*i.qty, 0);
+  const time = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  // Save
+  let orders = JSON.parse(localStorage.getItem('jastip_orders') || '[]');
+  orders = orders.filter(o => o.name.toLowerCase() !== userName.toLowerCase());
+  orders.push({name:userName, items, total, payment:selectedPay, time});
+  localStorage.setItem('jastip_orders', JSON.stringify(orders));
+
+  // Done page
+  let cardHtml = `<div class="done-card-title">Pesanan ${userName}</div>`;
+  items.forEach(i => {
+    cardHtml += `<div class="done-item"><span>${i.name} x${i.qty}</span><span>${rp(i.price*i.qty)}</span></div>`;
+  });
+  cardHtml += `<div class="done-total"><span>Total</span><span>${rp(total)}</span></div>`;
+  cardHtml += `<div class="done-pay-info">Bayar: <b style="color:var(--text)">${selectedPay}</b> &nbsp;•&nbsp; ${time}</div>`;
+  document.getElementById('doneCard').innerHTML = cardHtml;
+  document.getElementById('doneMsg').textContent = 'Pesanan ' + userName + ' sudah tercatat! 🎉';
+  showPage('page-done');
+}
+
+function kirimWA() {
+  const orders = JSON.parse(localStorage.getItem('jastip_orders') || '[]');
+  const my = orders.find(o => o.name.toLowerCase() === userName.toLowerCase());
+  if (!my) return;
+  let txt = `🍱 *PESANAN JASTIP*\n_Event Kita Kita_\n\n👤 *${my.name}*\n`;
+  my.items.forEach(i => txt += `• ${i.name} x${i.qty} — ${rp(i.price*i.qty)}\n`);
+  txt += `\n💰 Total: *${rp(my.total)}*\n💳 Bayar: *${my.payment}*`;
+  window.open('https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(txt));
+}
+
+function newOrder() {
+  cart = {};
+  document.getElementById('nameInput').value = '';
+  showPage('page-login');
+}
+
+// Auto-check open status every 5s
+setInterval(() => {
+  if (document.getElementById('page-menu').classList.contains('active')) renderMenu();
+}, 5000);
+</script>
+</body>
+</html>
