@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Panel — AI Jastip</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--gold:#F5A623;--bg:#0d0d0d;--card:#181818;--card2:#202020;--border:#2c2c2c;--text:#f0f0f0;--muted:#777;--green:#22c55e;--red:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow:hidden;}
+.page{display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;}
+.page.active{display:flex;}
+
+/* LOGIN */
+.login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+.login-logo{font-size:48px;margin-bottom:12px;}
+.login-title{font-size:24px;font-weight:800;margin-bottom:20px;}
+.login-input{width:100%;max-width:300px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:15px;color:var(--text);font-family:'Inter',sans-serif;margin-bottom:12px;outline:none;text-align:center;letter-spacing:4px;}
+.login-input:focus{border-color:var(--gold);}
+.login-btn{width:100%;max-width:300px;background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;}
+
+/* ADMIN HEADER */
+.admin-header{background:#111;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.admin-title{font-size:15px;font-weight:800;color:var(--gold);}
+.admin-sub{font-size:10px;color:var(--muted);}
+.live-dot{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);}
+.dot-anim{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TIMER */
+.timer-bar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.timer-display{font-size:22px;font-weight:800;font-family:'Inter',sans-serif;letter-spacing:2px;}
+.timer-display.warning{color:var(--gold);}
+.timer-display.danger{color:var(--red);}
+.timer-lbl{font-size:10px;color:var(--muted);margin-top:1px;}
+.timer-controls{display:flex;gap:6px;}
+.t-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;}
+.t-btn:active{opacity:.7;}
+
+/* BODY */
+.admin-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;color:var(--gold);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.grand-total{background:var(--card);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;}
+.gt-lbl{font-size:13px;color:#ccc;font-weight:600;}
+.gt-val{font-size:20px;font-weight:800;color:var(--gold);}
+
+.section-title{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px;}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.order-name{font-size:14px;font-weight:800;}
+.order-time{font-size:10px;color:var(--muted);}
+.pay-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
+.pay-dana{background:rgba(96,165,250,.2);color:#60a5fa;}
+.pay-bsi{background:rgba(34,197,94,.15);color:var(--green);}
+.pay-cash{background:rgba(245,166,35,.15);color:var(--gold);}
+.pay-shopeepay{background:rgba(255,80,80,.2);color:#ff5050;}
+.order-items{font-size:12px;color:#bbb;line-height:1.8;}
+.order-subtotal{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--gold);}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:10px;}
+
+/* ACTION BUTTONS */
+.actions{display:flex;flex-direction:column;gap:8px;}
+.act-btn{width:100%;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;border:none;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;}
+.act-btn:active{opacity:.8;}
+.btn-wa{background:#25D366;color:#000;}
+.btn-open{background:var(--green);color:#000;}
+.btn-close{background:var(--red);color:#fff;}
+.btn-reset{background:var(--card2);border:1px solid var(--border);color:var(--text);}
+
+.status-bar{padding:10px 14px;border-radius:10px;text-align:center;font-size:13px;font-weight:700;margin-bottom:2px;}
+.status-open{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green);}
+.status-closed{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+
+.logout-btn{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;text-align:center;padding:4px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-logo">👑</div>
+    <div class="login-title" style="color:var(--gold)">Admin Panel</div>
+    <input class="login-input" id="pinInput" type="password" placeholder="PIN Admin" maxlength="6" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    <button class="login-btn" onclick="adminLogin()">Masuk Admin 🔑</button>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted)">PIN default: 1234</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="page" id="page-admin">
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">📋 Admin Panel</div>
+      <div class="admin-sub">Event Kita Kita — AI Jastip</div>
+    </div>
+    <div class="live-dot"><div class="dot-anim"></div>LIVE</div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="timer-bar">
+    <div>
+      <div class="timer-display" id="timerDisplay">00:00</div>
+      <div class="timer-lbl" id="timerLbl">Timer pemesanan</div>
+    </div>
+    <div class="timer-controls">
+      <button class="t-btn" onclick="setTimer(10)">+10m</button>
+      <button class="t-btn" onclick="setTimer(20)">+20m</button>
+      <button class="t-btn" onclick="setTimer(30)">+30m</button>
+      <button class="t-btn" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="admin-body" id="adminBody"></div>
+</div>
+
+<script>
+const ADMIN_PIN = '1234';
+let orders = [];
+let isOpen = true;
+let timerEnd = null;
+let timerInterval = null;
+
+function adminLogin() {
+  const pin = document.getElementById('pinInput').value;
+  if (pin === ADMIN_PIN) {
+    showPage('page-admin');
+    loadData();
+    startAutoRefresh();
+  } else {
+    document.getElementById('pinInput').style.borderColor = 'var(--red)';
+    document.getElementById('pinInput').value = '';
+    setTimeout(() => document.getElementById('pinInput').style.borderColor = '', 1000);
+  }
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function loadData() {
+  orders = JSON.parse(localStorage.getItem('jastip_orders') || '[]');
+  const st = localStorage.getItem('jastip_state');
+  if (st) { const d = JSON.parse(st); isOpen = d.open ?? true; timerEnd = d.timerEnd || null; }
+  renderAdmin();
+  updateTimerDisplay();
+}
+
+function saveState() {
+  localStorage.setItem('jastip_state', JSON.stringify({open:isOpen, timerEnd}));
+}
+
+function startAutoRefresh() {
+  setInterval(() => {
+    orders = JSON.parse(localStorage.getItem('jastip_orders') || '[]');
+    renderAdmin();
+  }, 3000);
+}
+
+// ── TIMER ──
+function setTimer(minutes) {
+  timerEnd = Date.now() + minutes * 60000;
+  saveState();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+  tickTimer();
+}
+
+function resetTimer() {
+  timerEnd = null;
+  saveState();
+  if (timerInterval) clearInterval(timerInterval);
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerDisplay').className = 'timer-display';
+  document.getElementById('timerLbl').textContent = 'Timer pemesanan';
+}
+
+function tickTimer() {
+  if (!timerEnd) return;
+  const remaining = timerEnd - Date.now();
+  const disp = document.getElementById('timerDisplay');
+  if (remaining <= 0) {
+    disp.textContent = '⏰ HABIS';
+    disp.className = 'timer-display danger';
+    document.getElementById('timerLbl').textContent = 'Waktu pemesanan habis!';
+    clearInterval(timerInterval);
+    return;
+  }
+  const m = Math.floor(remaining / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  disp.className = 'timer-display' + (remaining < 300000 ? (remaining < 60000 ? ' danger' : ' warning') : '');
+  document.getElementById('timerLbl').textContent = 'Sisa waktu pemesanan';
+}
+
+function updateTimerDisplay() {
+  if (timerEnd && timerEnd > Date.now()) {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 1000);
+    tickTimer();
+  }
+}
+
+// ── RENDER ──
+function renderAdmin() {
+  const body = document.getElementById('adminBody');
+  const total = orders.reduce((a,o) => a+o.total, 0);
+  const totalItems = orders.reduce((a,o) => a+o.items.reduce((b,i)=>b+i.qty,0), 0);
+
+  const rp = n => "Rp " + n.toLocaleString('id-ID');
+
+  let html = '';
+
+  // Status
+  html += `<div class="${isOpen ? 'status-bar status-open' : 'status-bar status-closed'}">
+    ${isOpen ? '🟢 Pemesanan Sedang BUKA' : '🔴 Pemesanan Sedang DITUTUP'}
+  </div>`;
+
+  // Stats
+  html += `<div class="stats-row">
+    <div class="stat-card"><div class="stat-val">${orders.length}</div><div class="stat-lbl">Pemesan</div></div>
+    <div class="stat-card"><div class="stat-val">${totalItems}</div><div class="stat-lbl">Total Item</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:13px;color:var(--green)">${orders.length>0?orders[orders.length-1].time:'-'}</div><div class="stat-lbl">Terakhir</div></div>
+  </div>`;
+
+  // Grand total
+  html += `<div class="grand-total">
+    <div class="gt-lbl">💰 Grand Total (${orders.length} orang)</div>
+    <div class="gt-val">${rp(total)}</div>
+  </div>`;
+
+  // Orders list
+  if (orders.length > 0) {
+    html += `<div class="section-title">📋 Daftar Pesanan</div>`;
+    orders.forEach(o => {
+      const pc = o.payment.toLowerCase().includes('dana') ? 'pay-dana' :
+                 o.payment.toLowerCase().includes('bsi') ? 'pay-bsi' :
+                 o.payment.toLowerCase().includes('shopee') ? 'pay-shopeepay' : 'pay-cash';
+      html += `<div class="order-card">
+        <div class="order-top">
+          <div><div class="order-name">${o.name}</div><div class="order-time">${o.time}</div></div>
+          <span class="pay-badge ${pc}">${o.payment}</span>
+        </div>
+        <div class="order-items">${o.items.map(i=>`• ${i.name} x${i.qty} — ${rp(i.price*i.qty)}`).join('<br>')}</div>
+        <div class="order-subtotal"><span>Subtotal</span><span>${rp(o.total)}</span></div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty-state"><div class="empty-icon">📋</div><div>Belum ada pesanan masuk</div></div>`;
+  }
+
+  // Actions
+  html += `<div class="section-title">⚙️ Kontrol</div>
+  <div class="actions">
+    <button class="act-btn btn-wa" onclick="kirimWAAdmin()">📤 Kirim Rekap ke WA</button>
+    <button class="act-btn ${isOpen ? 'btn-close' : 'btn-open'}" onclick="toggleOpen()">
+      ${isOpen ? '🔴 Tutup Pemesanan' : '🟢 Buka Pemesanan'}
+    </button>
+    <button class="act-btn btn-reset" onclick="resetOrders()">🔄 Reset Semua Pesanan</button>
+  </div>
+  <div class="logout-btn" onclick="logout()">Keluar dari Admin</div>
+  <div style="height:16px"></div>`;
+
+  body.innerHTML = html;
+}
+
+function toggleOpen() {
+  isOpen = !isOpen;
+  saveState();
+  renderAdmin();
+}
+
+function resetOrders() {
+  if (!confirm('Reset semua pesanan? Tindakan ini tidak bisa dibatalkan!')) return;
+  orders = [];
+  localStorage.setItem('jastip_orders', JSON.stringify([]));
+  renderAdmin();
+}
+
+function kirimWAAdmin() {
+  if (orders.length === 0) { alert('Belum ada pesanan!'); return; }
+  const rp = n => "Rp " + n.toLocaleString('id-ID');
+  const total = orders.reduce((a,o)=>a+o.total,0);
+  let txt = `🍱 *REKAP PESANAN JASTIP*\n_Event Kita Kita — ${new Date().toLocaleDateString('id-ID')}_\n\n`;
+  orders.forEach((o,i) => {
+    txt += `${i+1}. *${o.name}*\n`;
+    o.items.forEach(it => txt += `   • ${it.name} x${it.qty} — ${rp(it.price*it.qty)}\n`);
+    txt += `   Bayar: ${o.payment} | Total: *${rp(o.total)}*\n\n`;
+  });
+  txt += `━━━━━━━━━━━━━━\n💰 *GRAND TOTAL: ${rp(total)}*\n(${orders.length} orang)`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt));
+}
+
+function logout() {
+  showPage('page-login');
+  document.getElementById('pinInput').value = '';
+}
+
+// PIN enter key
+document.getElementById('pinInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adminLogin();
+});
+</script>
+</body>
+</html>
