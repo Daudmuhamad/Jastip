@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Jastip Daud Team — Presentasi</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#F5A623;--gold2:#FFD27F;--bg:#080808;
+  --card:#111;--card2:#1a1a1a;--border:#222;
+  --text:#f0f0f0;--muted:#555;--green:#22c55e;--red:#ef4444;--blue:#60a5fa;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);}
+
+/* ═══ SLIDE ENGINE ═══ */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;}
+#vp{flex:1;position:relative;overflow:hidden;}
+.slide{
+  position:absolute;inset:0;
+  visibility:hidden;pointer-events:none;
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  background:var(--bg);
+}
+.slide.on{visibility:visible;pointer-events:auto;}
+
+/* ═══ NAV BAR ═══ */
+#nav{
+  height:52px;flex-shrink:0;
+  background:rgba(8,8,8,.97);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+}
+.nb{
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--text);padding:7px 16px;border-radius:8px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'Inter',sans-serif;
+  -webkit-appearance:none;
+}
+.nb:not(:disabled):active{background:var(--gold);color:#000;border-color:var(--gold);}
+.nb:disabled{opacity:.25;cursor:default;}
+#nmid{display:flex;flex-direction:column;align-items:center;gap:5px;}
+#ndots{display:flex;gap:4px;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .25s;}
+.dot.on{background:var(--gold);width:16px;border-radius:3px;}
+#nctr{font-size:10px;color:var(--muted);font-weight:600;}
+
+/* PROGRESS */
+#pg{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .35s;z-index:9999;}
+
+/* ═══ SHARED ═══ */
+.sp{padding:26px 18px 16px;}
+.gold{color:var(--gold);}
+.grn{color:var(--green);}
+.tag{display:inline-block;background:var(--gold);color:#000;font-size:9px;font-weight:800;padding:4px 11px;border-radius:4px;letter-spacing:1.5px;text-transform:uppercase;}
+.slbl{font-size:9px;font-weight:800;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:7px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+/* ═══ S1: HERO ═══ */
+.hero{
+  min-height:calc(100vh - 52px);
+  display:flex;flex-direction:column;
+  justify-content:center;
+  padding:40px 22px 30px;
+  position:relative;overflow:hidden;
+}
+.hero-orb1{position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(245,166,35,.18) 0%,transparent 65%);border-radius:50%;pointer-events:none;}
+.hero-orb2{position:absolute;bottom:40px;left:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 65%);border-radius:50%;pointer-events:none;}
+.hero-line{width:40px;height:3px;background:var(--gold);border-radius:2px;margin-bottom:20px;}
+.hero-title{font-family:'Space Grotesk',sans-serif;font-size:62px;font-weight:800;line-height:.88;letter-spacing:-4px;margin-bottom:14px;position:relative;}
+.hero-sub{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:3.5px;text-transform:uppercase;margin-bottom:18px;}
+.hero-desc{font-size:13px;color:#888;line-height:1.75;margin-bottom:28px;max-width:320px;}
+.hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px;}
+.chip{background:var(--card2);border:1px solid var(--border);padding:6px 13px;border-radius:20px;font-size:11px;font-weight:600;color:#aaa;}
+.hero-meta{padding-top:18px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.meta-item{display:flex;flex-direction:column;gap:3px;}
+.meta-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.meta-val{font-size:12px;font-weight:700;color:var(--gold);}
+.hero-wm{position:absolute;bottom:60px;right:16px;font-family:'Space Grotesk',sans-serif;font-size:110px;font-weight:900;color:rgba(245,166,35,.03);line-height:1;user-select:none;pointer-events:none;}
+
+/* ═══ S2: MASALAH ═══ */
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
+.prob{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:12px;padding:14px;}
+.prob-ic{font-size:22px;margin-bottom:8px;}
+.prob-t{font-size:13px;font-weight:700;margin-bottom:5px;}
+.prob-d{font-size:11px;color:var(--muted);line-height:1.5;}
+.warn-bar{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--gold);font-weight:700;line-height:1.5;display:flex;gap:8px;}
+
+/* ═══ S3: SOLUSI ═══ */
+.sol-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.sol{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 9px;text-align:center;transition:border-color .2s;}
+.sol-ic{font-size:26px;margin-bottom:8px;}
+.sol-t{font-size:11px;font-weight:700;margin-bottom:3px;}
+.sol-d{font-size:10px;color:var(--muted);line-height:1.4;}
+.firebase-badge{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:12px 14px;margin-top:12px;display:flex;align-items:center;gap:10px;}
+.fb-icon{font-size:24px;}
+.fb-text{font-size:12px;color:var(--gold);font-weight:700;line-height:1.5;}
+
+/* ═══ S4: CARA KERJA ═══ */
+.steps{display:flex;flex-direction:column;gap:10px;}
+.step{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px;}
+.snum{width:38px;height:38px;min-width:38px;background:var(--gold);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;}
+.st{font-size:13px;font-weight:700;margin-bottom:3px;}
+.sd{font-size:11px;color:var(--muted);line-height:1.5;}
+.result-bar{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:12px;color:var(--green);font-weight:700;line-height:1.5;display:flex;gap:8px;}
+
+/* ═══ S5: BEFORE/AFTER ═══ */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.vs-col{border-radius:12px;overflow:hidden;}
+.vs-hd{padding:10px 13px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:5px;}
+.vs-b .vs-hd{background:var(--red);color:#fff;}
+.vs-a .vs-hd{background:var(--green);color:#fff;}
+.vs-bd{background:var(--card);border:1px solid var(--border);border-top:none;padding:11px;}
+.vi{font-size:11px;color:#bbb;line-height:1.5;padding:4px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;}
+.vi:last-child{border-bottom:none;}
+.xi{color:var(--red);font-weight:800;flex-shrink:0;}
+.ci{color:var(--green);font-weight:800;flex-shrink:0;}
+.vs-bot{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:12px;color:var(--gold);font-weight:700;text-align:center;line-height:1.5;}
+
+/* ═══ S6: MANFAAT ═══ */
+.stat3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;}
+.stat-n{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;margin-bottom:3px;}
+.stat-l{font-size:10px;color:var(--muted);line-height:1.3;}
+.feat4{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.fi{font-size:20px;margin-bottom:7px;}
+.ft{font-size:12px;font-weight:700;margin-bottom:3px;}
+.fd{font-size:10px;color:var(--muted);line-height:1.4;}
+
+/* ═══ S7: TAMPILAN APP ═══ */
+.app-sub{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.phones{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.pw{display:flex;flex-direction:column;gap:6px;}
+.plbl{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-align:center;padding:4px;}
+.plbl-u{color:var(--blue);}
+.plbl-a{color:var(--gold);}
+.phone{background:#080808;border:2px solid #1e1e1e;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.8);}
+.notch{background:#000;height:18px;display:flex;align-items:center;justify-content:center;}
+.np{width:40px;height:6px;background:#141414;border-radius:3px;}
+.ptags{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:4px;}
+.ptag{font-size:8px;font-weight:600;padding:2px 6px;border-radius:7px;background:var(--card2);color:#444;border:1px solid var(--border);}
+
+/* ═══ S8: THANK YOU ═══ */
+.ty{
+  min-height:calc(100vh - 52px);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:30px 22px;
+  position:relative;overflow:hidden;
+}
+.ty-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:360px;height:360px;background:radial-gradient(circle,rgba(245,166,35,.13) 0%,transparent 65%);border-radius:50%;pointer-events:none;}
+.ty-em{font-size:56px;margin-bottom:18px;position:relative;}
+.ty-title{font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:900;line-height:.9;letter-spacing:-3px;margin-bottom:14px;position:relative;}
+.ty-sub{font-size:13px;color:#888;line-height:1.75;max-width:300px;margin:0 auto 22px;position:relative;}
+.ty-cta{background:var(--gold);color:#000;padding:13px 28px;border-radius:12px;font-size:14px;font-weight:800;display:inline-block;margin-bottom:20px;position:relative;}
+.ty-links{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;position:relative;}
+.ty-link{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;text-align:left;}
+.ty-link-ic{font-size:18px;flex-shrink:0;}
+.ty-link-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.ty-link-url{font-size:10px;color:var(--gold);font-weight:700;word-break:break-all;margin-top:2px;}
+.ty-meta{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:340px;position:relative;}
+.ty-meta-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.ty-meta-lbl{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.ty-meta-val{font-size:11px;font-weight:700;color:var(--gold);}
+</style>
+</head>
+<body>
+<div id="pg"></div>
+<div id="app">
+<div id="vp">
+
+<!-- ═══ SLIDE 1: HERO ═══ -->
+<div class="slide on" id="s1">
+<div class="hero">
+  <div class="hero-orb1"></div><div class="hero-orb2"></div>
+  <div style="position:relative;z-index:1;">
+    <div style="margin-bottom:18px"><span class="tag">Inovasi AI 2026</span></div>
+    <div class="hero-line"></div>
+    <div class="hero-title">AI<br><span class="gold">JAS</span>TIP</div>
+    <div class="hero-sub">Makan Siang Otomatis</div>
+    <div class="hero-desc">Solusi cerdas pesan makan siang — semua HP terhubung realtime via Firebase Cloud, tanpa repot tanya satu per satu.</div>
+    <div class="hero-chips">
+      <span class="chip">🌐 Firebase Realtime</span>
+      <span class="chip">📱 62 Menu Digital</span>
+      <span class="chip">💳 Multi Pembayaran</span>
+      <span class="chip">⏱️ Timer Otomatis</span>
+      <span class="chip">📊 Export Spreadsheet</span>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="meta-lbl">Presenter</div><div class="meta-val">Daud General Affair</div></div>
+      <div class="meta-item"><div class="meta-lbl">Team</div><div class="meta-val">Team Kita Kita</div></div>
+      <div class="meta-item"><div class="meta-lbl">Perusahaan</div><div class="meta-val">Team Kita Kita</div></div>
+      <div class="meta-item"><div class="meta-lbl">Tanggal</div><div class="meta-val">17 Juni 2026</div></div>
+    </div>
+  </div>
+  <div class="hero-wm">1</div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 2: MASALAH ═══ -->
+<div class="slide" id="s2">
+<div class="sp">
+  <div class="slbl">😤 Masalah Yang Ada Sekarang</div>
+  <div class="prob-grid">
+    <div class="prob"><div class="prob-ic">🚶</div><div class="prob-t">Keliling Satu-Satu</div><div class="prob-d">General Affair harus mendatangi setiap meja untuk tanya pesanan — buang waktu & tenaga setiap hari.</div></div>
+    <div class="prob"><div class="prob-ic">✏️</div><div class="prob-t">Catat Manual</div><div class="prob-d">Pesanan dicatat di kertas atau ingatan — rawan salah, lupa, dan tertukar antar orang.</div></div>
+    <div class="prob"><div class="prob-ic">🧮</div><div class="prob-t">Hitung Manual</div><div class="prob-d">Total harga dihitung sendiri pakai kalkulator — lambat dan bisa salah.</div></div>
+    <div class="prob"><div class="prob-ic">😤</div><div class="prob-t">Tidak Efisien</div><div class="prob-d">Proses berulang setiap hari memakan waktu berharga yang bisa dipakai hal lain.</div></div>
+  </div>
+  <div class="warn-bar">⚠️ Proses manual ini terjadi SETIAP HARI — sangat tidak efisien dan perlu segera diatasi!</div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 3: SOLUSI ═══ -->
+<div class="slide" id="s3">
+<div class="sp">
+  <div class="slbl">💡 Solusi: AI Jastip Otomatis</div>
+  <div class="sol-grid">
+    <div class="sol"><div class="sol-ic">📱</div><div class="sol-t">Menu Digital</div><div class="sol-d">62 menu lengkap tampil otomatis, tap + untuk pilih</div></div>
+    <div class="sol"><div class="sol-ic">🌐</div><div class="sol-t">Firebase Cloud</div><div class="sol-d">Semua HP terhubung realtime — pesanan masuk seketika</div></div>
+    <div class="sol"><div class="sol-ic">🧮</div><div class="sol-t">Hitung Otomatis</div><div class="sol-d">Total tagihan dikalkulasi sistem, nol kesalahan</div></div>
+    <div class="sol"><div class="sol-ic">📋</div><div class="sol-t">Rekap Instan</div><div class="sol-d">Rekap semua pesanan tersaji rapi realtime</div></div>
+    <div class="sol"><div class="sol-ic">💳</div><div class="sol-t">Multi Bayar</div><div class="sol-d">Dana, BSI, Shopeepay, Cash</div></div>
+    <div class="sol"><div class="sol-ic">📊</div><div class="sol-t">Export Excel</div><div class="sol-d">Download spreadsheet rekap satu klik</div></div>
+  </div>
+  <div class="firebase-badge">
+    <div class="fb-icon">🔥</div>
+    <div class="fb-text">Didukung <b>Google Firebase Realtime Database</b> — pesanan dari HP manapun langsung terhubung ke admin secara realtime!</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 4: CARA KERJA ═══ -->
+<div class="slide" id="s4">
+<div class="sp">
+  <div class="slbl">⚙️ Cara Kerja AI Jastip</div>
+  <div class="steps">
+    <div class="step"><div class="snum">1</div><div><div class="st">👨‍💼 Karyawan Buka Link</div><div class="sd">Masukkan nama → 62 menu langsung tampil dari Firebase cloud — tidak perlu install apapun</div></div></div>
+    <div class="step"><div class="snum">2</div><div><div class="st">🛒 Pilih Menu</div><div class="sd">Tap + untuk pilih, − untuk kurangi — harga otomatis terjumlah realtime di kolom rekap kanan</div></div></div>
+    <div class="step"><div class="snum">3</div><div><div class="st">💳 Konfirmasi & Bayar</div><div class="sd">Pilih metode bayar (Dana/BSI/Shopeepay/Cash) → konfirmasi → pesanan tersimpan ke Firebase</div></div></div>
+    <div class="step"><div class="snum">4</div><div><div class="st">📡 Admin Pantau Realtime</div><div class="sd">Admin buka link terpisah — semua pesanan dari semua HP masuk otomatis, live, tanpa refresh</div></div></div>
+  </div>
+  <div class="result-bar">✅ GA tidak perlu keliling lagi — pesanan masuk otomatis, rapi, dan realtime dari semua HP!</div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 5: BEFORE/AFTER ═══ -->
+<div class="slide" id="s5">
+<div class="sp">
+  <div class="slbl">📊 Sebelum vs Sesudah</div>
+  <div class="vs">
+    <div class="vs-col vs-b">
+      <div class="vs-hd">✕ SEBELUM (Manual)</div>
+      <div class="vs-bd">
+        <div class="vi"><span class="xi">✕</span>GA keliling tanya satu per satu</div>
+        <div class="vi"><span class="xi">✕</span>Catat di kertas / ingatan</div>
+        <div class="vi"><span class="xi">✕</span>Hitung total manual</div>
+        <div class="vi"><span class="xi">✕</span>Rawan salah & lupa</div>
+        <div class="vi"><span class="xi">✕</span>±30 menit terbuang/hari</div>
+        <div class="vi"><span class="xi">✕</span>Tidak ada rekap digital</div>
+      </div>
+    </div>
+    <div class="vs-col vs-a">
+      <div class="vs-hd">✓ SESUDAH (AI Jastip)</div>
+      <div class="vs-bd">
+        <div class="vi"><span class="ci">✓</span>Pesan sendiri via HP</div>
+        <div class="vi"><span class="ci">✓</span>AI catat otomatis di cloud</div>
+        <div class="vi"><span class="ci">✓</span>Harga kalkulasi otomatis</div>
+        <div class="vi"><span class="ci">✓</span>Akurat 100%, nol terlewat</div>
+        <div class="vi"><span class="ci">✓</span>Selesai hitungan menit</div>
+        <div class="vi"><span class="ci">✓</span>Export spreadsheet 1 klik</div>
+      </div>
+    </div>
+  </div>
+  <div class="vs-bot">AI Jastip menghemat waktu, mengurangi kesalahan, dan meningkatkan profesionalisme kerja!</div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 6: MANFAAT ═══ -->
+<div class="slide" id="s6">
+<div class="sp">
+  <div class="slbl">🌟 Manfaat Bagi Perusahaan</div>
+  <div class="stat3">
+    <div class="stat"><div class="stat-n gold">30 Mnt</div><div class="stat-l">Waktu dihemat per hari</div></div>
+    <div class="stat"><div class="stat-n grn">100%</div><div class="stat-l">Akurasi pencatatan</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--blue)">0 Rp</div><div class="stat-l">Biaya tambahan sistem</div></div>
+  </div>
+  <div class="feat4">
+    <div class="feat"><div class="fi">⚡</div><div class="ft">Efisiensi Operasional</div><div class="fd">GA fokus tugas penting lain — pesan makan sudah otomatis sepenuhnya.</div></div>
+    <div class="feat"><div class="fi">🌐</div><div class="ft">Realtime Semua HP</div><div class="fd">Firebase cloud — pesanan dari HP manapun langsung masuk rekap admin.</div></div>
+    <div class="feat"><div class="fi">📱</div><div class="ft">Tanpa Install</div><div class="fd">Cukup buka link dari browser HP — langsung bisa dipakai siapapun.</div></div>
+    <div class="feat"><div class="fi">📊</div><div class="ft">Export Spreadsheet</div><div class="fd">Rekap otomatis bisa didownload jadi file Excel kapan saja satu klik.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 7: TAMPILAN APP ═══ -->
+<div class="slide" id="s7">
+<div class="sp">
+  <div class="slbl">📱 Tampilan Aplikasi AI Jastip</div>
+  <div class="app-sub">Tampilan nyata yang digunakan — user pilih menu di kiri, rekap realtime semua HP di kanan. Admin pantau & kontrol penuh dari manapun.</div>
+  <div class="phones">
+
+    <!-- USER PHONE -->
+    <div class="pw">
+      <div class="plbl plbl-u">👤 Link User</div>
+      <div class="phone">
+        <div class="notch"><div class="np"></div></div>
+        <div style="background:#080808;padding:7px;display:flex;flex-direction:column;gap:4px;">
+          <!-- hdr -->
+          <div style="background:#111;border-radius:7px;padding:6px 8px;display:flex;align-items:center;gap:6px;">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;">🍱</div>
+            <div><div style="font-size:9px;font-weight:700">AI Jastip</div><div style="font-size:7px;color:var(--green)">● Buka • Event Kita Kita</div></div>
+            <div style="margin-left:auto;font-size:7.5px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--gold);padding:2px 6px;border-radius:9px;">🛒 2 item</div>
+          </div>
+          <!-- timer -->
+          <div style="background:#0d0d0d;border-radius:5px;padding:4px 7px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:7.5px;">⏱️ <span style="color:var(--green);font-weight:800">45:00</span> <span style="color:var(--muted)">sisa waktu</span></div>
+            <div style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);font-size:7px;font-weight:700;padding:2px 5px;border-radius:7px;">🟢 Buka</div>
+          </div>
+          <!-- col hdr -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:4px;overflow:hidden;font-size:7px;font-weight:800;color:var(--gold);text-align:center;text-transform:uppercase;letter-spacing:1px;">
+            <div style="background:#0f0f0f;padding:4px">🍽️ Menu</div>
+            <div style="background:#0f0f0f;padding:4px">📋 Rekap</div>
+          </div>
+          <!-- 2col -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            <!-- left menu -->
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div style="font-size:7px;color:var(--muted)">Halo <b style="color:#ccc">Budi</b>! 😊</div>
+              <div style="font-size:6.5px;font-weight:800;color:var(--gold);padding:2px 0;border-bottom:1px solid var(--border);">🍚 WARTEG</div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:5px;padding:4px 5px;display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:7.5px;font-weight:600">Nasi 1 Porsi</div><div style="font-size:7px;color:var(--gold)">Rp 5.000</div></div>
+                <div style="width:17px;height:17px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;color:#000;font-weight:700;flex-shrink:0">+</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:5px;padding:4px 5px;display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:7.5px;font-weight:600">Ayam Goreng</div><div style="font-size:7px;color:var(--gold)">Rp 8.000</div></div>
+                <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
+                  <div style="width:15px;height:15px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;">−</div>
+                  <span style="font-size:8px;font-weight:800;color:var(--gold)">1</span>
+                  <div style="width:15px;height:15px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;">+</div>
+                </div>
+              </div>
+              <div style="font-size:6.5px;font-weight:800;color:var(--gold);padding:2px 0;border-bottom:1px solid var(--border);">🍛 NASPAD</div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:5px;padding:4px 5px;display:flex;justify-content:space-between;align-items:center;">
+                <div><div style="font-size:7px;font-weight:600">Naspad Rendang</div><div style="font-size:7px;color:var(--gold)">Rp 13.000</div></div>
+                <div style="width:17px;height:17px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;color:#000;font-weight:700;flex-shrink:0">+</div>
+              </div>
+              <div style="background:var(--gold);border-radius:5px;padding:5px 6px;display:flex;justify-content:space-between;margin-top:2px;">
+                <span style="font-size:7.5px;font-weight:800;color:#000">Pesan Sekarang</span>
+                <span style="font-size:7.5px;font-weight:800;color:#000">Rp 8.000</span>
+              </div>
+            </div>
+            <!-- right rekap -->
+            <div style="display:flex;flex-direction:column;gap:3px;border-left:1px solid var(--border);padding-left:4px;">
+              <div style="background:var(--card);border:1px solid rgba(245,166,35,.2);border-radius:6px;padding:5px;">
+                <div style="display:flex;justify-content:space-between;font-size:7px;color:#888;padding:1px 0"><span>Pemesan</span><span style="font-weight:700;color:#ccc">3 orang</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:9px;font-weight:800;color:var(--gold);padding-top:4px;border-top:1px solid var(--border);margin-top:3px;"><span>Total</span><span>Rp 36.000</span></div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:5px;padding:5px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                  <span style="font-size:8px;font-weight:800">Budi</span>
+                  <span style="font-size:6.5px;font-weight:700;background:rgba(96,165,250,.2);color:#60a5fa;padding:1px 4px;border-radius:3px;">DANA</span>
+                </div>
+                <div style="font-size:7px;color:#666">• Ayam Goreng x1</div>
+                <div style="font-size:7.5px;font-weight:800;color:var(--gold);text-align:right;margin-top:2px;">Rp 8.000</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:5px;padding:5px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                  <span style="font-size:8px;font-weight:800">Araa</span>
+                  <span style="font-size:6.5px;font-weight:700;background:rgba(34,197,94,.15);color:var(--green);padding:1px 4px;border-radius:3px;">BSI</span>
+                </div>
+                <div style="font-size:7px;color:#666">• Naspad Rendang x1</div>
+                <div style="font-size:7.5px;font-weight:800;color:var(--gold);text-align:right;margin-top:2px;">Rp 13.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ptags">
+        <span class="ptag">62 menu</span>
+        <span class="ptag">Rekap realtime</span>
+        <span class="ptag">Timer live</span>
+      </div>
+    </div>
+
+    <!-- ADMIN PHONE -->
+    <div class="pw">
+      <div class="plbl plbl-a">👑 Link Admin</div>
+      <div class="phone">
+        <div class="notch"><div class="np"></div></div>
+        <div style="background:#050505;display:flex;flex-direction:column;">
+          <div style="background:#111;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a1a1a;">
+            <div style="font-size:9px;font-weight:800;color:var(--gold)">📋 Admin Panel</div>
+            <div style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);font-size:7px;font-weight:800;padding:2px 5px;border-radius:3px;">● LIVE</div>
+          </div>
+          <div style="background:#0a0a0a;padding:7px 10px;border-bottom:1px solid #141414;display:flex;justify-content:space-between;align-items:center;">
+            <div><div style="font-size:18px;font-weight:800;color:var(--green);letter-spacing:2px;">45:00</div><div style="font-size:7px;color:var(--muted)">Sisa waktu</div></div>
+            <div style="display:flex;gap:3px;">
+              <div style="background:var(--card2);border:1px solid var(--border);color:#ccc;padding:3px 5px;border-radius:4px;font-size:7px;font-weight:700">+10m</div>
+              <div style="background:var(--card2);border:1px solid var(--border);color:#ccc;padding:3px 5px;border-radius:4px;font-size:7px;font-weight:700">+30m</div>
+              <div style="background:var(--card2);border:1px solid var(--border);color:#ccc;padding:3px 5px;border-radius:4px;font-size:7px;font-weight:700">+60m</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#1a1a1a;border-bottom:1px solid #141414;">
+            <div style="background:#080808;padding:6px 4px;text-align:center;"><div style="font-size:13px;font-weight:800;color:var(--gold)">3</div><div style="font-size:7px;color:var(--muted)">Pemesan</div></div>
+            <div style="background:#080808;padding:6px 4px;text-align:center;"><div style="font-size:10px;font-weight:800;color:#ccc">Araa</div><div style="font-size:7px;color:var(--muted)">Terbaru</div></div>
+            <div style="background:#080808;padding:6px 4px;text-align:center;"><div style="font-size:9px;font-weight:800;color:#555">07.38</div><div style="font-size:7px;color:var(--muted)">Update</div></div>
+          </div>
+          <div style="background:#0a0a0a;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #141414;">
+            <div style="font-size:8px;color:var(--muted)">💰 Grand Total (3 orang)</div>
+            <div style="font-size:12px;font-weight:800;color:var(--gold)">Rp 36.000</div>
+          </div>
+          <div style="padding:6px;display:flex;flex-direction:column;gap:4px;">
+            <div style="background:#111;border:1px solid #1a1a1a;border-radius:6px;padding:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><div style="font-size:9px;font-weight:800">Daud</div><span style="font-size:7px;font-weight:800;background:rgba(96,165,250,.2);color:#60a5fa;padding:1px 5px;border-radius:3px;">DANA</span></div>
+              <div style="font-size:8px;color:#555">🍗 Ayam Goreng x1</div>
+              <div style="font-size:9px;font-weight:800;color:var(--gold);text-align:right;margin-top:2px;">Rp 8.000</div>
+            </div>
+            <div style="background:#111;border:1px solid #1a1a1a;border-radius:6px;padding:6px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;"><div style="font-size:9px;font-weight:800">Araa</div><span style="font-size:7px;font-weight:800;background:rgba(34,197,94,.15);color:var(--green);padding:1px 5px;border-radius:3px;">BSI</span></div>
+              <div style="font-size:8px;color:#555">🍛 Naspad Rendang x1</div>
+              <div style="font-size:9px;font-weight:800;color:var(--gold);text-align:right;margin-top:2px;">Rp 13.000</div>
+            </div>
+          </div>
+          <div style="padding:5px;display:flex;gap:3px;border-top:1px solid #111;">
+            <div style="flex:1;padding:5px;border-radius:5px;font-size:7px;font-weight:800;text-align:center;background:rgba(37,211,102,.12);color:#25D366;border:1px solid rgba(37,211,102,.2);">📤 WA</div>
+            <div style="flex:1;padding:5px;border-radius:5px;font-size:7px;font-weight:800;text-align:center;background:rgba(29,111,66,.2);color:#4ade80;border:1px solid rgba(29,111,66,.3);">📊 Excel</div>
+            <div style="flex:1;padding:5px;border-radius:5px;font-size:7px;font-weight:800;text-align:center;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);">🔴 Tutup</div>
+            <div style="flex:1;padding:5px;border-radius:5px;font-size:7px;font-weight:800;text-align:center;background:var(--card2);color:#888;border:1px solid var(--border);">🔄 Reset</div>
+          </div>
+        </div>
+      </div>
+      <div class="ptags">
+        <span class="ptag">Timer +10/30/60m</span>
+        <span class="ptag">Rekap live</span>
+        <span class="ptag">Export Excel</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SLIDE 8: THANK YOU ═══ -->
+<div class="slide" id="s8">
+<div class="ty">
+  <div class="ty-orb"></div>
+  <div class="ty-em">🍱🤖🎉</div>
+  <div class="ty-title">TERIMA<br><span class="gold">KASIH!</span></div>
+  <div class="ty-sub">AI Jastip hadir untuk membuat pekerjaan lebih cerdas, lebih efisien, dan lebih menyenangkan! 🚀</div>
+  <div class="ty-cta">Siap diimplementasikan mulai hari ini!</div>
+  <div class="ty-links">
+    <div class="ty-link">
+      <div class="ty-link-ic">👤</div>
+      <div><div class="ty-link-lbl">Link User (Temen-temen)</div><div class="ty-link-url">daudmuhamad.github.io/Jastip/jastip-user-v2-4.html</div></div>
+    </div>
+    <div class="ty-link">
+      <div class="ty-link-ic">👑</div>
+      <div><div class="ty-link-lbl">Link Admin (PIN: 1234)</div><div class="ty-link-url">daudmuhamad.github.io/Jastip/jastip-admin-v2-6.html</div></div>
+    </div>
+  </div>
+  <div class="ty-meta">
+    <div class="ty-meta-item"><div class="ty-meta-lbl">Presenter</div><div class="ty-meta-val">Daud General Affair</div></div>
+    <div class="ty-meta-item"><div class="ty-meta-lbl">Team</div><div class="ty-meta-val">Team Kita Kita</div></div>
+    <div class="ty-meta-item"><div class="ty-meta-lbl">Perusahaan</div><div class="ty-meta-val">Team Kita Kita</div></div>
+    <div class="ty-meta-item"><div class="ty-meta-lbl">Tanggal</div><div class="ty-meta-val">17 Juni 2026</div></div>
+  </div>
+</div>
+</div>
+
+</div><!-- /vp -->
+
+<!-- NAV -->
+<div id="nav">
+  <button type="button" class="nb" id="bp" disabled>← Prev</button>
+  <div id="nmid">
+    <div id="ndots"></div>
+    <div id="nctr">1 / 8</div>
+  </div>
+  <button type="button" class="nb" id="bn">Next →</button>
+</div>
+</div><!-- /app -->
+
+<script>
+const T=8; let c=1;
+const dr=document.getElementById('ndots');
+for(let i=1;i<=T;i++){
+  const d=document.createElement('div');
+  d.className='dot'+(i===1?' on':'');
+  d.addEventListener('click',()=>gt(i));
+  dr.appendChild(d);
+}
+
+function gt(n){
+  document.getElementById('s'+c).classList.remove('on');
+  dr.children[c-1].classList.remove('on');
+  c=n;
+  const sl=document.getElementById('s'+c);
+  sl.classList.add('on');
+  sl.scrollTop=0;
+  dr.children[c-1].classList.add('on');
+  document.getElementById('nctr').textContent=c+' / '+T;
+  document.getElementById('bp').disabled=c===1;
+  document.getElementById('bn').disabled=c===T;
+  document.getElementById('pg').style.width=(c/T*100)+'%';
+}
+
+function go(d){const n=c+d;if(n>=1&&n<=T)gt(n);}
+
+window.addEventListener('load',function(){
+  document.getElementById('bp').addEventListener('click',()=>go(-1));
+  document.getElementById('bn').addEventListener('click',()=>go(1));
+  document.getElementById('pg').style.width=(1/T*100)+'%';
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=tx-e.changedTouches[0].clientX;
+  if(Math.abs(dx)>50)go(dx>0?1:-1);
+},{passive:true});
+</script>
+</body>
+</html>
