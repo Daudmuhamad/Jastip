@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Panel — AI Jastip</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--gold:#F5A623;--bg:#0d0d0d;--card:#181818;--card2:#202020;--border:#2c2c2c;--text:#f0f0f0;--muted:#777;--green:#22c55e;--red:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);overflow:hidden;}
+
+/* PAGES */
+.page{display:none;flex-direction:column;position:fixed;inset:0;}
+.page.active{display:flex;}
+
+/* LOGIN */
+.login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+.login-logo{font-size:52px;margin-bottom:14px;}
+.login-title{font-size:24px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:28px;}
+.pin-input{
+  width:100%;max-width:280px;
+  background:var(--card);border:2px solid var(--border);
+  border-radius:14px;padding:16px;
+  font-size:24px;color:var(--text);
+  font-family:'Inter',sans-serif;
+  margin-bottom:14px;outline:none;
+  text-align:center;letter-spacing:10px;
+  display:block;
+}
+.pin-input:focus{border-color:var(--gold);}
+.masuk-btn{
+  width:100%;max-width:280px;
+  background:var(--gold);color:#000;
+  border:none;border-radius:14px;
+  padding:16px;font-size:16px;font-weight:800;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  display:block;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.masuk-btn:active{opacity:.85;}
+.conn-info{margin-top:12px;font-size:11px;color:var(--muted);}
+.pin-hint{margin-top:8px;font-size:11px;color:var(--muted);}
+
+/* HEADER */
+.admin-hdr{background:#111;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.admin-hdr-title{font-size:15px;font-weight:800;color:var(--gold);}
+.admin-hdr-sub{font-size:10px;color:var(--muted);}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--green);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TIMER */
+.timer-sec{background:var(--card);border-bottom:1px solid var(--border);padding:10px 14px;flex-shrink:0;}
+.timer-row{display:flex;align-items:center;justify-content:space-between;}
+.timer-num{font-size:30px;font-weight:800;letter-spacing:3px;}
+.timer-num.ok{color:var(--green);}
+.timer-num.warn{color:var(--gold);}
+.timer-num.danger{color:var(--red);}
+.timer-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.timer-btns{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+.t-btn{
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--text);padding:7px 10px;border-radius:8px;
+  font-size:11px;font-weight:700;cursor:pointer;
+  font-family:'Inter',sans-serif;
+  -webkit-appearance:none;
+}
+.t-btn:active{opacity:.7;}
+.t-btn.red{border-color:rgba(239,68,68,.4);color:var(--red);}
+
+/* BODY */
+.admin-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+
+.status-bar{padding:10px 14px;border-radius:10px;text-align:center;font-size:13px;font-weight:700;}
+.s-open{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--green);}
+.s-closed{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;color:var(--gold);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.grand-row{background:var(--card);border:1px solid rgba(245,166,35,.3);border-radius:10px;padding:13px;display:flex;justify-content:space-between;align-items:center;}
+.grand-lbl{font-size:12px;color:#ccc;font-weight:600;}
+.grand-val{font-size:20px;font-weight:800;color:var(--gold);}
+
+.sec-title{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+.order-name{font-size:14px;font-weight:800;}
+.order-time{font-size:10px;color:var(--muted);}
+.pay-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;}
+.p-dana{background:rgba(96,165,250,.2);color:#60a5fa;}
+.p-bsi{background:rgba(34,197,94,.15);color:var(--green);}
+.p-cash{background:rgba(245,166,35,.15);color:var(--gold);}
+.p-shopee{background:rgba(255,80,80,.2);color:#ff5050;}
+.order-items{font-size:12px;color:#bbb;line-height:1.8;}
+.order-sub{margin-top:8px;padding-top:7px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--gold);}
+
+.empty-box{text-align:center;padding:32px 20px;color:var(--muted);}
+
+.actions{display:flex;flex-direction:column;gap:8px;}
+.act-btn{
+  width:100%;padding:14px;border-radius:12px;
+  font-size:14px;font-weight:800;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  -webkit-appearance:none;
+}
+.act-btn:active{opacity:.8;}
+.btn-wa{background:#25D366;color:#000;}
+.btn-excel{background:#1D6F42;color:#fff;}
+.btn-open{background:var(--green);color:#000;}
+.btn-close{background:var(--red);color:#fff;}
+.btn-reset{background:var(--card2);border:1px solid var(--border);color:var(--text);}
+.logout-lnk{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;text-align:center;padding:6px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-logo">👑</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">AI Jastip — Event Kita Kita</div>
+    <input type="password" class="pin-input" id="pinBox" placeholder="••••" maxlength="6">
+    <button type="button" class="masuk-btn" id="masukBtn">Masuk Admin 🔑</button>
+    <div class="conn-info" id="connInfo">🔄 Menghubungkan ke Firebase...</div>
+    <div class="pin-hint">PIN: 1234</div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="page-admin">
+  <div class="admin-hdr">
+    <div>
+      <div class="admin-hdr-title">📋 Admin Panel</div>
+      <div class="admin-hdr-sub">Event Kita Kita — AI Jastip</div>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
+
+  <div class="timer-sec">
+    <div class="timer-row">
+      <div>
+        <div class="timer-num ok" id="timerNum">00:00</div>
+        <div class="timer-lbl" id="timerLbl">Atur timer pemesanan</div>
+      </div>
+      <div class="timer-btns">
+        <button type="button" class="t-btn" id="btn10m">+10m</button>
+        <button type="button" class="t-btn" id="btn20m">+20m</button>
+        <button type="button" class="t-btn" id="btn30m">+30m</button>
+        <button type="button" class="t-btn" id="btn60m">+60m</button>
+        <button type="button" class="t-btn red" id="btnReset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-body" id="adminBody">
+    <div class="empty-box">🔄 Memuat data...</div>
+  </div>
+</div>
+
+<script>
+// ══ CONFIG ══
+const FB = 'https://jastip-73b53-default-rtdb.asia-southeast1.firebasedatabase.app';
+const PIN = '1234';
+const rp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
+
+// ══ STATE ══
+let appState = { open: true, timerEnd: null };
+let orders = [];
+let timerIv = null;
+let pollIv = null;
+
+// ══ FIREBASE ══
+async function fbGet(path) {
+  try {
+    const r = await fetch(FB + path + '.json');
+    const d = await r.json();
+    return d;
+  } catch(e) { return null; }
+}
+async function fbSet(path, data) {
+  try {
+    await fetch(FB + path + '.json', { method: 'PUT', body: JSON.stringify(data) });
+  } catch(e) {}
+}
+
+// ══ LOAD ══
+async function loadData() {
+  const state = await fbGet('/state');
+  if (state && typeof state === 'object') {
+    appState = { open: state.open !== false, timerEnd: state.timerEnd || null };
+  }
+  const raw = await fbGet('/orders');
+  if (raw && typeof raw === 'object') {
+    orders = Object.values(raw).filter(o => o && o.name && o.items);
+  } else {
+    orders = [];
+  }
+}
+
+// ══ PAGE NAV ══
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ══ LOGIN ══
+async function doLogin() {
+  const pin = document.getElementById('pinBox').value;
+  if (pin !== PIN) {
+    const box = document.getElementById('pinBox');
+    box.style.borderColor = 'var(--red)';
+    box.value = '';
+    setTimeout(() => box.style.borderColor = 'var(--border)', 1000);
+    return;
+  }
+  document.getElementById('connInfo').textContent = '🔄 Memuat data...';
+  await loadData();
+  showPage('page-admin');
+  renderAdmin();
+  startTimer();
+  startPoll();
+}
+
+// ══ TIMER ══
+function startTimer() {
+  if (timerIv) clearInterval(timerIv);
+  tickTimer();
+  timerIv = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  const el = document.getElementById('timerNum');
+  const lb = document.getElementById('timerLbl');
+  if (!el) return;
+  const end = appState.timerEnd;
+  if (!end) {
+    el.textContent = '00:00';
+    el.className = 'timer-num ok';
+    lb.textContent = 'Atur timer pemesanan';
+    return;
+  }
+  const rem = end - Date.now();
+  if (rem <= 0) {
+    el.textContent = '⏰ HABIS';
+    el.className = 'timer-num danger';
+    lb.textContent = 'Waktu pemesanan habis!';
+    return;
+  }
+  const m = Math.floor(rem / 60000);
+  const s = Math.floor((rem % 60000) / 1000);
+  el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  el.className = 'timer-num ' + (rem < 60000 ? 'danger' : rem < 300000 ? 'warn' : 'ok');
+  lb.textContent = 'Sisa waktu pemesanan';
+}
+
+async function setTimer(mins) {
+  appState.timerEnd = Date.now() + Math.min(mins, 60) * 60000;
+  await fbSet('/state', appState);
+}
+
+async function resetTimer() {
+  appState.timerEnd = null;
+  await fbSet('/state', appState);
+  tickTimer();
+}
+
+// ══ POLL ══
+function startPoll() {
+  if (pollIv) clearInterval(pollIv);
+  pollIv = setInterval(async () => {
+    await loadData();
+    if (document.getElementById('page-admin').classList.contains('active')) {
+      renderAdmin();
+    }
+  }, 4000);
+}
+
+// ══ RENDER ══
+function renderAdmin() {
+  const body = document.getElementById('adminBody');
+  const total = orders.reduce((a, o) => a + (o.total || 0), 0);
+  const totalItems = orders.reduce((a, o) => a + (o.items || []).reduce((b, i) => b + (i.qty || 0), 0), 0);
+  const last = orders.length > 0 ? orders[orders.length - 1].time || '-' : '-';
+
+  let html = '';
+
+  // Status
+  html += `<div class="status-bar ${appState.open ? 's-open' : 's-closed'}">
+    ${appState.open ? '🟢 Pemesanan Sedang BUKA' : '🔴 Pemesanan Sedang DITUTUP'}
+  </div>`;
+
+  // Stats
+  html += `<div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">${orders.length}</div><div class="stat-lbl">Pemesan</div></div>
+    <div class="stat-card"><div class="stat-val">${totalItems}</div><div class="stat-lbl">Total Item</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:13px;color:var(--green)">${last}</div><div class="stat-lbl">Terakhir</div></div>
+  </div>`;
+
+  // Grand total
+  html += `<div class="grand-row">
+    <div class="grand-lbl">💰 Grand Total (${orders.length} orang)</div>
+    <div class="grand-val">${rp(total)}</div>
+  </div>`;
+
+  // Orders
+  if (orders.length > 0) {
+    html += `<div class="sec-title">📋 Daftar Pesanan</div>`;
+    orders.forEach(o => {
+      const pay = (o.payment || '').toLowerCase();
+      const pc = pay.includes('dana') ? 'p-dana' : pay.includes('bsi') ? 'p-bsi' : pay.includes('shopee') ? 'p-shopee' : 'p-cash';
+      html += `<div class="order-card">
+        <div class="order-top">
+          <div><div class="order-name">${o.name}</div><div class="order-time">${o.time || ''}</div></div>
+          <span class="pay-pill ${pc}">${o.payment}</span>
+        </div>
+        <div class="order-items">${(o.items || []).map(i => `• ${i.name} x${i.qty} — ${rp(i.price * i.qty)}`).join('<br>')}</div>
+        <div class="order-sub"><span>Subtotal</span><span>${rp(o.total)}</span></div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="empty-box"><div style="font-size:36px;margin-bottom:10px">📋</div><div>Belum ada pesanan masuk</div></div>`;
+  }
+
+  // Actions
+  html += `<div class="sec-title">⚙️ Kontrol</div>
+  <div class="actions">
+    <button type="button" class="act-btn btn-wa" id="aWA">📤 Kirim Rekap ke WA</button>
+    <button type="button" class="act-btn btn-excel" id="aExcel">📊 Export Spreadsheet</button>
+    <button type="button" class="act-btn ${appState.open ? 'btn-close' : 'btn-open'}" id="aToggle">
+      ${appState.open ? '🔴 Tutup Pemesanan' : '🟢 Buka Pemesanan'}
+    </button>
+    <button type="button" class="act-btn btn-reset" id="aReset">🔄 Reset Semua Pesanan</button>
+  </div>
+  <div class="logout-lnk" id="aLogout">Keluar dari Admin</div>
+  <div style="height:20px"></div>`;
+
+  body.innerHTML = html;
+
+  // Bind action buttons
+  document.getElementById('aWA').addEventListener('click', kirimWA);
+  document.getElementById('aExcel').addEventListener('click', exportExcel);
+  document.getElementById('aToggle').addEventListener('click', toggleOpen);
+  document.getElementById('aReset').addEventListener('click', resetOrders);
+  document.getElementById('aLogout').addEventListener('click', logout);
+}
+
+// ══ ACTIONS ══
+async function toggleOpen() {
+  appState.open = !appState.open;
+  await fbSet('/state', appState);
+  renderAdmin();
+}
+
+async function resetOrders() {
+  if (!confirm('Reset semua pesanan? Tidak bisa dibatalkan!')) return;
+  await fbSet('/orders', {});
+  orders = [];
+  renderAdmin();
+}
+
+function kirimWA() {
+  if (!orders.length) { alert('Belum ada pesanan!'); return; }
+  const total = orders.reduce((a, o) => a + o.total, 0);
+  let txt = `🍱 *REKAP PESANAN JASTIP*\n_Event Kita Kita — ${new Date().toLocaleDateString('id-ID')}_\n\n`;
+  orders.forEach((o, i) => {
+    txt += `${i+1}. *${o.name}*\n`;
+    o.items.forEach(it => txt += `   • ${it.name} x${it.qty} — ${rp(it.price * it.qty)}\n`);
+    txt += `   Bayar: ${o.payment} | Total: *${rp(o.total)}*\n\n`;
+  });
+  txt += `━━━━━━━━━━━━━━\n💰 *GRAND TOTAL: ${rp(total)}*\n(${orders.length} orang)`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt));
+}
+
+function exportExcel() {
+  if (!orders.length) { alert('Belum ada pesanan!'); return; }
+  const tanggal = new Date().toLocaleDateString('id-ID');
+  const waktu = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  const total = orders.reduce((a, o) => a + o.total, 0);
+
+  let csv = '\uFEFF';
+  csv += `REKAP PESANAN JASTIP - Event Kita Kita\n`;
+  csv += `Tanggal: ${tanggal} ${waktu}\n`;
+  csv += `Total Pemesan: ${orders.length} orang\n\n`;
+  csv += `No,Nama,Menu,Qty,Harga Satuan,Subtotal,Metode Bayar,Waktu\n`;
+
+  let no = 1;
+  orders.forEach(o => {
+    o.items.forEach((it, idx) => {
+      csv += `${idx === 0 ? no : ''},`;
+      csv += `${idx === 0 ? o.name : ''},`;
+      csv += `"${it.name}",`;
+      csv += `${it.qty},`;
+      csv += `${it.price},`;
+      csv += `${it.price * it.qty},`;
+      csv += `${idx === 0 ? o.payment : ''},`;
+      csv += `${idx === 0 ? (o.time || '') : ''}\n`;
+    });
+    csv += `,,,,${rp(o.total)},,\n`;
+    no++;
+  });
+  csv += `\nGRAND TOTAL,,,,${rp(total)},,\n`;
+
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Rekap_Jastip_${tanggal.replace(/\//g, '-')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function logout() {
+  if (pollIv) clearInterval(pollIv);
+  if (timerIv) clearInterval(timerIv);
+  document.getElementById('pinBox').value = '';
+  showPage('page-login');
+}
+
+// ══ INIT ══
+window.addEventListener('load', function() {
+  // Login button
+  document.getElementById('masukBtn').addEventListener('click', doLogin);
+  document.getElementById('pinBox').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // Timer buttons
+  document.getElementById('btn10m').addEventListener('click', () => setTimer(10));
+  document.getElementById('btn20m').addEventListener('click', () => setTimer(20));
+  document.getElementById('btn30m').addEventListener('click', () => setTimer(30));
+  document.getElementById('btn60m').addEventListener('click', () => setTimer(60));
+  document.getElementById('btnReset').addEventListener('click', resetTimer);
+
+  // Check Firebase connection
+  fbGet('/state').then(r => {
+    const ci = document.getElementById('connInfo');
+    if (ci) ci.textContent = r !== null ? '✅ Terhubung ke Firebase' : '⚠️ Gagal terhubung, cek internet';
+  });
+});
+</script>
+</body>
+</html>
