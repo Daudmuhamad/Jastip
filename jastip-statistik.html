@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Statistik — AI Jastip</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700;800&display=swap');
+:root{--gold:#F5A623;--bg:#0d0d0d;--card:#181818;--card2:#202020;--border:#2c2c2c;--text:#f0f0f0;--muted:#666;--green:#22c55e;--red:#ef4444;--blue:#60a5fa;--purple:#a78bfa;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);}
+
+/* PAGES */
+.page{display:none;flex-direction:column;position:fixed;inset:0;}
+.page.active{display:flex;}
+
+/* LOGIN */
+.login-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;background:radial-gradient(ellipse at top,rgba(245,166,35,.1) 0%,transparent 60%),var(--bg);}
+.login-logo{font-size:48px;margin-bottom:12px;}
+.login-title{font-size:22px;font-weight:800;color:var(--gold);margin-bottom:6px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.pin-input{width:100%;max-width:260px;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px;font-size:22px;color:var(--text);font-family:'Inter',sans-serif;margin-bottom:12px;outline:none;text-align:center;letter-spacing:8px;display:block;}
+.pin-input:focus{border-color:var(--gold);}
+.masuk-btn{width:100%;max-width:260px;background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;display:block;font-family:'Inter',sans-serif;}
+.masuk-btn:active{opacity:.8;}
+.conn-info{margin-top:10px;font-size:11px;color:var(--muted);}
+
+/* MAIN HEADER */
+.main-hdr{background:#111;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.main-hdr-left{}
+.main-hdr-title{font-size:15px;font-weight:800;color:var(--gold);}
+.main-hdr-sub{font-size:10px;color:var(--muted);}
+.hdr-right-btns{display:flex;align-items:center;gap:8px;}
+.logout-btn-sm{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;}
+
+/* TAB BAR */
+.tab-bar{background:#111;border-bottom:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto;}
+.tab{flex:1;min-width:80px;padding:10px 8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* BODY */
+.stat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;}
+
+/* EXPORT BAR */
+.export-bar{display:flex;gap:8px;}
+.exp-btn{flex:1;padding:11px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;}
+.exp-btn:active{opacity:.8;}
+.exp-wa{background:#25D366;color:#000;}
+.exp-csv{background:#1D6F42;color:#fff;}
+
+/* SUMMARY CARDS */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.sum-val{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px;}
+.sum-lbl{font-size:10px;color:var(--muted);line-height:1.4;}
+.sum-card.gold-card{border-color:rgba(245,166,35,.3);}
+.sum-card.green-card{border-color:rgba(34,197,94,.3);}
+.sum-card.blue-card{border-color:rgba(96,165,250,.3);}
+.sum-card.purple-card{border-color:rgba(167,139,250,.3);}
+
+/* SECTION */
+.sec-title{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.sec-count{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0;}
+
+/* MENU RANKING */
+.menu-rank{display:flex;flex-direction:column;gap:6px;}
+.rank-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px;}
+.rank-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+.rank-1{background:var(--gold);color:#000;}
+.rank-2{background:#aaa;color:#000;}
+.rank-3{background:#cd7f32;color:#fff;}
+.rank-other{background:var(--card2);color:var(--muted);}
+.rank-info{flex:1;min-width:0;}
+.rank-name{font-size:12px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rank-cat{font-size:10px;color:var(--muted);}
+.rank-right{text-align:right;flex-shrink:0;}
+.rank-qty{font-size:14px;font-weight:800;color:var(--gold);}
+.rank-pcs{font-size:10px;color:var(--muted);}
+.rank-bar-wrap{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:6px;}
+.rank-bar{height:4px;background:var(--gold);border-radius:2px;transition:width .3s;}
+
+/* PERSON STATS */
+.person-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;}
+.person-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.person-name{font-size:14px;font-weight:800;}
+.person-total{font-size:13px;font-weight:800;color:var(--gold);}
+.person-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.ps{background:var(--card2);border-radius:8px;padding:8px;text-align:center;}
+.ps-val{font-size:13px;font-weight:800;color:var(--gold);}
+.ps-lbl{font-size:9px;color:var(--muted);}
+.person-fav{font-size:11px;color:#bbb;line-height:1.8;}
+.person-fav-title{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;}
+.pay-row-mini{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.pay-mini{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.pm-dana{background:rgba(96,165,250,.2);color:#60a5fa;}
+.pm-bsi{background:rgba(34,197,94,.15);color:var(--green);}
+.pm-cash{background:rgba(245,166,35,.15);color:var(--gold);}
+.pm-shopee{background:rgba(255,80,80,.2);color:#ff5050;}
+
+/* DAY CHART */
+.day-chart{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.day-bars{display:flex;gap:6px;align-items:flex-end;height:80px;margin-bottom:8px;}
+.day-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.day-bar{width:100%;background:var(--gold);border-radius:4px 4px 0 0;min-height:3px;transition:height .3s;}
+.day-bar.today{background:var(--green);}
+.day-bar.zero{background:var(--border);}
+.day-label{font-size:9px;color:var(--muted);font-weight:600;}
+.day-val{font-size:9px;font-weight:700;color:var(--gold);}
+
+/* CAT BREAKDOWN */
+.cat-breakdown{display:flex;flex-direction:column;gap:6px;}
+.cat-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 13px;}
+.cat-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cat-row-name{font-size:12px;font-weight:700;}
+.cat-row-qty{font-size:12px;font-weight:800;color:var(--gold);}
+.cat-prog-wrap{height:5px;background:var(--border);border-radius:3px;}
+.cat-prog{height:5px;border-radius:3px;background:var(--gold);}
+
+/* EMPTY */
+.empty-box{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:10px;}
+
+/* LOADING */
+.loading-box{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-logo">📊</div>
+    <div class="login-title">Statistik & Laporan</div>
+    <div class="login-sub">AI Jastip — Event Kita Kita</div>
+    <input type="password" class="pin-input" id="pinBox" placeholder="••••" maxlength="6">
+    <button type="button" class="masuk-btn" id="masukBtn">Masuk 🔑</button>
+    <div class="conn-info" id="connInfo">🔄 Menghubungkan ke Firebase...</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted)">PIN: 1234</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page" id="page-main">
+  <div class="main-hdr">
+    <div class="main-hdr-left">
+      <div class="main-hdr-title">📊 Statistik Jastip</div>
+      <div class="main-hdr-sub" id="lastUpdate">Event Kita Kita</div>
+    </div>
+    <div class="hdr-right-btns">
+      <div class="logout-btn-sm" onclick="logout()">Keluar</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <div class="tab active" id="tab-minggu" onclick="switchTab('minggu')">📅 Minggu Ini</div>
+    <div class="tab" id="tab-bulan" onclick="switchTab('bulan')">📆 Bulan Ini</div>
+    <div class="tab" id="tab-menu" onclick="switchTab('menu')">🏆 Top Menu</div>
+    <div class="tab" id="tab-orang" onclick="switchTab('orang')">👥 Per Orang</div>
+  </div>
+
+  <div class="stat-body" id="statBody">
+    <div class="loading-box">🔄 Memuat data...</div>
+  </div>
+</div>
+
+<script>
+const FB = 'https://jastip-73b53-default-rtdb.asia-southeast1.firebasedatabase.app';
+const PIN = '1234';
+const rp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
+
+let allData = {}; // { 'YYYY-MM-DD': { orders: {...} } }
+let currentTab = 'minggu';
+
+// Firebase
+async function fbGet(path) {
+  try { const r = await fetch(FB+path+'.json'); return await r.json(); } catch(e) { return null; }
+}
+
+// Date helpers
+function getToday() { return new Date().toISOString().split('T')[0]; }
+function getDateRange(days) {
+  const dates = [];
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+function getWeekDates() { return getDateRange(7); }
+function getMonthDates() {
+  const now = new Date();
+  const dates = [];
+  const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  for (let i = 1; i <= days; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), i);
+    if (d <= now) dates.push(d.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short'});
+}
+function fmtDateShort(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+}
+
+// Page nav
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Login
+async function doLogin() {
+  const pin = document.getElementById('pinBox').value;
+  if (pin !== PIN) {
+    const b = document.getElementById('pinBox');
+    b.style.borderColor = 'var(--red)'; b.value = '';
+    setTimeout(() => b.style.borderColor = 'var(--border)', 1000); return;
+  }
+  document.getElementById('connInfo').textContent = '🔄 Memuat data...';
+  await loadAllData();
+  showPage('page-main');
+  renderTab('minggu');
+}
+
+// Load all history data
+async function loadAllData() {
+  const raw = await fbGet('/history');
+  allData = raw && typeof raw === 'object' ? raw : {};
+  // Also load today's orders from /orders (legacy)
+  const legacyOrders = await fbGet('/orders');
+  if (legacyOrders && typeof legacyOrders === 'object') {
+    const today = getToday();
+    if (!allData[today]) allData[today] = {};
+    if (!allData[today].orders) allData[today].orders = {};
+    Object.assign(allData[today].orders, legacyOrders);
+  }
+  document.getElementById('lastUpdate').textContent =
+    'Update: ' + new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+}
+
+// Get orders for date range
+function getOrdersForDates(dates) {
+  const all = [];
+  dates.forEach(date => {
+    const dayData = allData[date];
+    if (!dayData || !dayData.orders) return;
+    const orders = typeof dayData.orders === 'object' ? Object.values(dayData.orders) : [];
+    orders.filter(o => o && o.name).forEach(o => all.push({...o, date}));
+  });
+  return all;
+}
+
+// Aggregate menu stats
+function getMenuStats(orders) {
+  const map = {};
+  orders.forEach(o => {
+    (o.items || []).forEach(it => {
+      if (!map[it.name]) map[it.name] = {name: it.name, qty: 0, revenue: 0, price: it.price || 0, cat: getCat(it.name)};
+      map[it.name].qty += (it.qty || 0);
+      map[it.name].revenue += (it.price || 0) * (it.qty || 0);
+    });
+  });
+  return Object.values(map).sort((a,b) => b.qty - a.qty);
+}
+
+// Get person stats
+function getPersonStats(orders) {
+  const map = {};
+  orders.forEach(o => {
+    const name = o.name;
+    if (!map[name]) map[name] = {name, orders: 0, total: 0, items: {}, payments: {}};
+    map[name].orders++;
+    map[name].total += (o.total || 0);
+    (o.items || []).forEach(it => {
+      if (!map[name].items[it.name]) map[name].items[it.name] = 0;
+      map[name].items[it.name] += (it.qty || 0);
+    });
+    const pay = o.payment || 'Cash';
+    map[name].payments[pay] = (map[name].payments[pay] || 0) + 1;
+  });
+  return Object.values(map).sort((a,b) => b.total - a.total);
+}
+
+// Category helper
+function getCat(name) {
+  if (['Naspad'].some(k => name.includes(k))) return '🍛 Naspad';
+  if (['Nasi','Ikan Tongkol','Ayam Goreng','Kikil','Usus','Orek','Kentang','Tahu Udang','Sayur'].some(k => name.includes(k))) return '🍚 Nasi & Lauk';
+  if (['Mie Ayam','Bakso','Ayam Geprek','Fried Chicken','Pecak','Gado','Ketoprak','Karedok','Soto'].some(k => name.includes(k))) return '🍜 Menu Lainnya';
+  if (['Pentol','Indomie','Tahu Crispy','Otak','Cimol','Cilok','Piscok','Combro','Gorengan','Keripik','Kerupuk'].some(k => name.includes(k))) return '🍿 Jajanan';
+  if (['Es Kelapa','Kelapa Muda','Teh','Mineral','Jus'].some(k => name.includes(k))) return '🥤 Minuman';
+  return '🍜 Lainnya';
+}
+
+// Get cat breakdown
+function getCatStats(menuStats) {
+  const cats = {};
+  menuStats.forEach(m => {
+    if (!cats[m.cat]) cats[m.cat] = {name: m.cat, qty: 0, revenue: 0};
+    cats[m.cat].qty += m.qty;
+    cats[m.cat].revenue += m.revenue;
+  });
+  return Object.values(cats).sort((a,b) => b.qty - a.qty);
+}
+
+// Switch tab
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  const body = document.getElementById('statBody');
+  body.innerHTML = '<div class="loading-box">⏳ Memuat...</div>';
+  setTimeout(() => {
+    if (tab === 'minggu') renderMinggu();
+    else if (tab === 'bulan') renderBulan();
+    else if (tab === 'menu') renderTopMenu();
+    else if (tab === 'orang') renderPerOrang();
+  }, 100);
+}
+
+// ══ RENDER MINGGU ══
+function renderMinggu() {
+  const body = document.getElementById('statBody');
+  const dates = getWeekDates();
+  const orders = getOrdersForDates(dates);
+  const today = getToday();
+
+  if (!orders.length) {
+    body.innerHTML = emptyHTML('Belum ada data minggu ini');
+    return;
+  }
+
+  const totalPesanan = orders.length;
+  const totalItem = orders.reduce((a,o) => a+(o.items||[]).reduce((b,i)=>b+(i.qty||0),0), 0);
+  const totalRevenue = orders.reduce((a,o) => a+(o.total||0), 0);
+  const menuStats = getMenuStats(orders);
+  const topMenu = menuStats[0];
+
+  // Day by day
+  const dayMap = {};
+  dates.forEach(d => dayMap[d] = {orders:0, revenue:0});
+  orders.forEach(o => {
+    if (dayMap[o.date]) { dayMap[o.date].orders++; dayMap[o.date].revenue += (o.total||0); }
+  });
+  const maxOrders = Math.max(...Object.values(dayMap).map(d => d.orders), 1);
+
+  let html = '';
+
+  // Summary
+  html += `<div class="sum-grid">
+    <div class="sum-card gold-card"><div class="sum-val" style="color:var(--gold)">${totalPesanan}</div><div class="sum-lbl">Total Pemesan<br>Minggu Ini</div></div>
+    <div class="sum-card green-card"><div class="sum-val" style="color:var(--green)">${totalItem}</div><div class="sum-lbl">Total Item<br>Dipesan</div></div>
+    <div class="sum-card blue-card"><div class="sum-val" style="color:var(--blue);font-size:18px">${rp(totalRevenue)}</div><div class="sum-lbl">Total Pengeluaran<br>Minggu Ini</div></div>
+    <div class="sum-card purple-card"><div class="sum-val" style="color:var(--purple);font-size:18px">${topMenu?topMenu.name.substring(0,12)+'...':'-'}</div><div class="sum-lbl">Menu Terpopuler<br>${topMenu?topMenu.qty+' pcs':''}</div></div>
+  </div>`;
+
+  // Bar chart per hari
+  html += `<div class="day-chart">
+    <div style="font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">📈 PESANAN PER HARI</div>
+    <div class="day-bars">`;
+  dates.forEach(date => {
+    const d = dayMap[date];
+    const pct = maxOrders > 0 ? (d.orders / maxOrders * 100) : 0;
+    const isToday = date === today;
+    const label = new Date(date+'T00:00:00').toLocaleDateString('id-ID',{weekday:'short'});
+    html += `<div class="day-bar-wrap">
+      <div class="day-val">${d.orders||''}</div>
+      <div class="day-bar${isToday?' today':d.orders===0?' zero':''}" style="height:${Math.max(pct*0.7,d.orders?3:2)}px"></div>
+      <div class="day-label">${label}${isToday?'*':''}</div>
+    </div>`;
+  });
+  html += `</div><div style="font-size:9px;color:var(--muted)">* Hari ini &nbsp;|&nbsp; 🟡 Hari lain &nbsp;|&nbsp; 🟢 Hari ini</div></div>`;
+
+  // Top 5 menu
+  html += `<div class="sec-title">🏆 TOP MENU MINGGU INI <span class="sec-count">${menuStats.length} menu</span></div>
+  <div class="menu-rank">`;
+  const maxQty = menuStats[0]?.qty || 1;
+  menuStats.slice(0, 5).forEach((m, i) => {
+    const pct = (m.qty / maxQty * 100).toFixed(0);
+    html += `<div class="rank-item">
+      <div class="rank-num ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${m.name}</div>
+        <div class="rank-cat">${m.cat}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%"></div></div>
+      </div>
+      <div class="rank-right"><div class="rank-qty">${m.qty}</div><div class="rank-pcs">pcs</div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Export
+  html += exportBar('minggu');
+
+  body.innerHTML = html;
+}
+
+// ══ RENDER BULAN ══
+function renderBulan() {
+  const body = document.getElementById('statBody');
+  const dates = getMonthDates();
+  const orders = getOrdersForDates(dates);
+  const now = new Date();
+  const bulanNama = now.toLocaleDateString('id-ID', {month:'long', year:'numeric'});
+
+  if (!orders.length) {
+    body.innerHTML = emptyHTML('Belum ada data bulan ini');
+    return;
+  }
+
+  const totalPesanan = orders.length;
+  const totalItem = orders.reduce((a,o) => a+(o.items||[]).reduce((b,i)=>b+(i.qty||0),0), 0);
+  const totalRevenue = orders.reduce((a,o) => a+(o.total||0), 0);
+  const hariAktif = new Set(orders.map(o => o.date)).size;
+  const menuStats = getMenuStats(orders);
+  const catStats = getCatStats(menuStats);
+  const maxCat = catStats[0]?.qty || 1;
+
+  // Payment breakdown
+  const payMap = {};
+  orders.forEach(o => {
+    const p = o.payment || 'Cash';
+    if (!payMap[p]) payMap[p] = {count:0, total:0};
+    payMap[p].count++; payMap[p].total += (o.total||0);
+  });
+
+  let html = '';
+
+  html += `<div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--gold);text-align:center;">📆 Laporan Bulan ${bulanNama}</div>`;
+
+  html += `<div class="sum-grid">
+    <div class="sum-card gold-card"><div class="sum-val" style="color:var(--gold)">${totalPesanan}</div><div class="sum-lbl">Total Pemesan</div></div>
+    <div class="sum-card green-card"><div class="sum-val" style="color:var(--green)">${hariAktif}</div><div class="sum-lbl">Hari Aktif Pesan</div></div>
+    <div class="sum-card blue-card"><div class="sum-val" style="color:var(--blue)">${totalItem}</div><div class="sum-lbl">Total Item</div></div>
+    <div class="sum-card purple-card"><div class="sum-val" style="color:var(--purple);font-size:17px">${rp(Math.round(totalRevenue/hariAktif))}</div><div class="sum-lbl">Rata-rata/Hari</div></div>
+  </div>`;
+
+  html += `<div class="sum-card" style="text-align:center;border-color:rgba(245,166,35,.3);padding:16px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">TOTAL PENGELUARAN BULAN INI</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;color:var(--gold)">${rp(totalRevenue)}</div>
+  </div>`;
+
+  // Category breakdown
+  html += `<div class="sec-title">🍽️ BREAKDOWN KATEGORI</div>
+  <div class="cat-breakdown">`;
+  catStats.forEach(cat => {
+    const pct = (cat.qty / maxCat * 100).toFixed(0);
+    html += `<div class="cat-row">
+      <div class="cat-row-top">
+        <div class="cat-row-name">${cat.name}</div>
+        <div class="cat-row-qty">${cat.qty} pcs</div>
+      </div>
+      <div class="cat-prog-wrap"><div class="cat-prog" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Top 10 menu
+  html += `<div class="sec-title">🏆 TOP 10 MENU BULAN INI</div>
+  <div class="menu-rank">`;
+  const maxQty = menuStats[0]?.qty || 1;
+  menuStats.slice(0, 10).forEach((m, i) => {
+    const pct = (m.qty / maxQty * 100).toFixed(0);
+    html += `<div class="rank-item">
+      <div class="rank-num ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${m.name}</div>
+        <div class="rank-cat">${m.cat}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%"></div></div>
+      </div>
+      <div class="rank-right"><div class="rank-qty">${m.qty}</div><div class="rank-pcs">pcs</div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Payment breakdown
+  html += `<div class="sec-title">💳 REKAP PEMBAYARAN</div>
+  <div class="sum-grid">`;
+  Object.entries(payMap).sort((a,b)=>b[1].count-a[1].count).forEach(([pay, d]) => {
+    html += `<div class="sum-card"><div class="sum-val" style="font-size:18px;color:var(--gold)">${d.count}x</div><div class="sum-lbl">${pay}<br>${rp(d.total)}</div></div>`;
+  });
+  html += `</div>`;
+
+  html += exportBar('bulan');
+  body.innerHTML = html;
+}
+
+// ══ RENDER TOP MENU ══
+function renderTopMenu() {
+  const body = document.getElementById('statBody');
+  // All time stats
+  const allDates = Object.keys(allData);
+  const orders = getOrdersForDates(allDates);
+
+  if (!orders.length) { body.innerHTML = emptyHTML('Belum ada data'); return; }
+
+  const menuStats = getMenuStats(orders);
+  const catStats = getCatStats(menuStats);
+  const maxQty = menuStats[0]?.qty || 1;
+  const maxCat = catStats[0]?.qty || 1;
+
+  let html = '';
+
+  html += `<div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:10px;padding:11px 14px;font-size:13px;font-weight:700;color:var(--gold);text-align:center;">🏆 Statistik All-Time (${allDates.length} hari)</div>`;
+
+  // Top 3 podium
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">`;
+  const top3 = menuStats.slice(0,3);
+  [1,0,2].forEach(idx => {
+    const m = top3[idx];
+    if (!m) return;
+    const medals = ['🥇','🥈','🥉'];
+    html += `<div class="sum-card" style="border-color:${idx===0?'rgba(245,166,35,.4)':idx===1?'rgba(170,170,170,.3)':'rgba(205,127,50,.3)'}">
+      <div style="font-size:24px;margin-bottom:4px">${medals[idx]}</div>
+      <div style="font-size:11px;font-weight:800;margin-bottom:4px;line-height:1.3">${m.name}</div>
+      <div style="font-size:16px;font-weight:800;color:var(--gold)">${m.qty}</div>
+      <div style="font-size:10px;color:var(--muted)">pcs</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Full ranking
+  html += `<div class="sec-title">📋 SEMUA MENU <span class="sec-count">${menuStats.length} menu</span></div>
+  <div class="menu-rank">`;
+  menuStats.forEach((m, i) => {
+    const pct = (m.qty / maxQty * 100).toFixed(0);
+    html += `<div class="rank-item">
+      <div class="rank-num ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-other'}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${m.name}</div>
+        <div class="rank-cat">${m.cat} &nbsp;•&nbsp; ${rp(m.revenue)}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%"></div></div>
+      </div>
+      <div class="rank-right"><div class="rank-qty">${m.qty}</div><div class="rank-pcs">pcs</div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Cat chart
+  html += `<div class="sec-title">🍽️ KATEGORI TERPOPULER</div>
+  <div class="cat-breakdown">`;
+  catStats.forEach(cat => {
+    const pct = (cat.qty / maxCat * 100).toFixed(0);
+    html += `<div class="cat-row">
+      <div class="cat-row-top"><div class="cat-row-name">${cat.name}</div><div class="cat-row-qty">${cat.qty} pcs — ${rp(cat.revenue)}</div></div>
+      <div class="cat-prog-wrap"><div class="cat-prog" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += exportBar('alltime');
+  body.innerHTML = html;
+}
+
+// ══ RENDER PER ORANG ══
+function renderPerOrang() {
+  const body = document.getElementById('statBody');
+  const allDates = Object.keys(allData);
+  const orders = getOrdersForDates(allDates);
+
+  if (!orders.length) { body.innerHTML = emptyHTML('Belum ada data'); return; }
+
+  const personStats = getPersonStats(orders);
+
+  let html = '';
+
+  html += `<div class="sum-grid">
+    <div class="sum-card gold-card"><div class="sum-val" style="color:var(--gold)">${personStats.length}</div><div class="sum-lbl">Total Karyawan<br>Pernah Pesan</div></div>
+    <div class="sum-card green-card"><div class="sum-val" style="color:var(--green);font-size:18px">${rp(orders.reduce((a,o)=>a+(o.total||0),0))}</div><div class="sum-lbl">Total All-Time</div></div>
+  </div>`;
+
+  html += `<div class="sec-title">👥 STATISTIK PER KARYAWAN <span class="sec-count">${personStats.length} orang</span></div>`;
+
+  personStats.forEach((p, idx) => {
+    const favItems = Object.entries(p.items).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const avgOrder = Math.round(p.total / p.orders);
+    const payEntries = Object.entries(p.payments).sort((a,b)=>b[1]-a[1]);
+    html += `<div class="person-card">
+      <div class="person-top">
+        <div>
+          <div class="person-name">${idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : ''}${p.name}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">${p.orders}x pesan all-time</div>
+        </div>
+        <div class="person-total">${rp(p.total)}</div>
+      </div>
+      <div class="person-stats">
+        <div class="ps"><div class="ps-val">${p.orders}</div><div class="ps-lbl">Total Pesanan</div></div>
+        <div class="ps"><div class="ps-val" style="font-size:12px">${rp(avgOrder)}</div><div class="ps-lbl">Rata-rata/Pesanan</div></div>
+        <div class="ps"><div class="ps-val">${Object.keys(p.items).length}</div><div class="ps-lbl">Variasi Menu</div></div>
+      </div>
+      <div class="person-fav-title">Menu favorit:</div>
+      <div class="person-fav">${favItems.map(([name, qty]) => `• ${name} (${qty}x)`).join('<br>')}</div>
+      <div class="pay-row-mini" style="margin-top:8px">
+        ${payEntries.map(([pay]) => `<span class="pay-mini ${pay.toLowerCase().includes('dana')?'pm-dana':pay.toLowerCase().includes('bsi')?'pm-bsi':pay.toLowerCase().includes('shopee')?'pm-shopee':'pm-cash'}">${pay}</span>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  html += exportBar('orang');
+  body.innerHTML = html;
+}
+
+// Export bar
+function exportBar(type) {
+  return `<div class="export-bar">
+    <button type="button" class="exp-btn exp-wa" onclick="exportWA('${type}')">📤 Kirim ke WA</button>
+    <button type="button" class="exp-btn exp-csv" onclick="exportCSV('${type}')">📊 Download Excel</button>
+  </div>`;
+}
+
+// Empty state
+function emptyHTML(msg) {
+  return `<div class="empty-box"><div class="empty-icon">📊</div><div>${msg}</div></div>`;
+}
+
+// ══ EXPORT WA ══
+function exportWA(type) {
+  let dates, title;
+  if (type === 'minggu') { dates = getWeekDates(); title = 'MINGGU INI'; }
+  else if (type === 'bulan') { dates = getMonthDates(); title = 'BULAN ' + new Date().toLocaleDateString('id-ID',{month:'long',year:'numeric'}).toUpperCase(); }
+  else { dates = Object.keys(allData); title = 'ALL TIME'; }
+
+  const orders = getOrdersForDates(dates);
+  if (!orders.length) { alert('Belum ada data!'); return; }
+
+  const menuStats = getMenuStats(orders);
+  const catStats = getCatStats(menuStats);
+  const total = orders.reduce((a,o) => a+(o.total||0), 0);
+  const totalItem = orders.reduce((a,o) => a+(o.items||[]).reduce((b,i)=>b+(i.qty||0),0), 0);
+
+  let txt = `📊 *LAPORAN JASTIP — ${title}*\n`;
+  txt += `_Event Kita Kita_\n`;
+  txt += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+  txt += `👥 Total Pemesan: *${orders.length} orang*\n`;
+  txt += `🛒 Total Item: *${totalItem} pcs*\n`;
+  txt += `💰 Total Pengeluaran: *${rp(total)}*\n\n`;
+
+  txt += `🏆 *TOP MENU:*\n`;
+  menuStats.slice(0, 10).forEach((m, i) => {
+    txt += `${i+1}. ${m.name} — *${m.qty} pcs*\n`;
+  });
+
+  txt += `\n🍽️ *PER KATEGORI:*\n`;
+  catStats.forEach(cat => {
+    txt += `${cat.name}: *${cat.qty} pcs*\n`;
+  });
+
+  txt += `\n📱 _Laporan dari AI Jastip_`;
+
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt));
+}
+
+// ══ EXPORT CSV ══
+function exportCSV(type) {
+  let dates, title;
+  if (type === 'minggu') { dates = getWeekDates(); title = 'Minggu_Ini'; }
+  else if (type === 'bulan') { dates = getMonthDates(); title = 'Bulan_' + new Date().toLocaleDateString('id-ID',{month:'long'}); }
+  else { dates = Object.keys(allData); title = 'AllTime'; }
+
+  const orders = getOrdersForDates(dates);
+  if (!orders.length) { alert('Belum ada data!'); return; }
+
+  const menuStats = getMenuStats(orders);
+  const catStats = getCatStats(menuStats);
+  const personStats = getPersonStats(orders);
+  const total = orders.reduce((a,o) => a+(o.total||0), 0);
+
+  let csv = `LAPORAN AI JASTIP - Event Kita Kita\n`;
+  csv += `Periode: ${title.replace(/_/g,' ')}\n`;
+  csv += `Digenerate: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}\n\n`;
+
+  csv += `RINGKASAN\n`;
+  csv += `Total Pemesan,${orders.length} orang\n`;
+  csv += `Total Item,${orders.reduce((a,o)=>a+(o.items||[]).reduce((b,i)=>b+(i.qty||0),0),0)} pcs\n`;
+  csv += `Total Pengeluaran,${rp(total)}\n\n`;
+
+  csv += `RANKING MENU\nNo,Nama Menu,Kategori,Total Qty,Total Revenue\n`;
+  menuStats.forEach((m,i) => { csv += `${i+1},"${m.name}","${m.cat}",${m.qty},${rp(m.revenue)}\n`; });
+
+  csv += `\nKATEGORI\nKategori,Qty,Revenue\n`;
+  catStats.forEach(c => { csv += `"${c.name}",${c.qty},${rp(c.revenue)}\n`; });
+
+  csv += `\nSTATISTIK PER KARYAWAN\nNama,Total Pesanan,Total Spend,Rata-rata/Pesanan,Menu Favorit\n`;
+  personStats.forEach(p => {
+    const fav = Object.entries(p.items).sort((a,b)=>b[1]-a[1])[0];
+    csv += `"${p.name}",${p.orders},${rp(p.total)},${rp(Math.round(p.total/p.orders))},"${fav?fav[0]+' ('+fav[1]+'x)':''}"\n`;
+  });
+
+  csv += `\nDETAIL PESANAN HARIAN\nTanggal,Nama,Menu,Qty,Harga,Subtotal,Pembayaran,Waktu\n`;
+  orders.forEach(o => {
+    (o.items||[]).forEach((it,idx) => {
+      csv += `${idx===0?o.date:''},"${idx===0?o.name:''}","${it.name}",${it.qty},${it.price||0},${(it.price||0)*(it.qty||0)},"${idx===0?o.payment:''}","${idx===0?o.time||'':''}"\n`;
+    });
+  });
+
+  const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  const a = document.createElement('a');
+  a.href = dataUri;
+  a.download = `Laporan_Jastip_${title}_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function logout() {
+  showPage('page-login');
+  document.getElementById('pinBox').value = '';
+}
+
+// INIT
+window.addEventListener('load', function() {
+  document.getElementById('masukBtn').addEventListener('click', doLogin);
+  document.getElementById('pinBox').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  fbGet('/state').then(r => {
+    const ci = document.getElementById('connInfo');
+    if (ci) ci.textContent = r !== null ? '✅ Firebase terhubung' : '⚠️ Cek koneksi internet';
+  });
+});
+</script>
+</body>
+</html>
