@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code — AI Jastip</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--gold:#F5A623;--bg:#0d0d0d;--card:#181818;--border:#2c2c2c;--text:#f0f0f0;--muted:#777;--green:#22c55e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);}
+
+body{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px 20px;
+  background:radial-gradient(ellipse at top,rgba(245,166,35,.1) 0%,transparent 55%),var(--bg);
+}
+
+.wrap{
+  width:100%;max-width:360px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:28px 22px;
+  text-align:center;
+  box-shadow:0 12px 48px rgba(0,0,0,.6);
+}
+
+.logo{font-size:40px;margin-bottom:10px;}
+.title{font-size:22px;font-weight:800;margin-bottom:4px;}
+.title span{color:var(--gold);}
+.subtitle{font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+
+/* QR wrapper */
+#qrcode{
+  display:flex;justify-content:center;
+  margin-bottom:20px;
+}
+#qrcode canvas,#qrcode img{
+  border-radius:14px;
+  border:4px solid var(--border);
+  background:#fff;
+  padding:8px;
+}
+
+.scan-box{
+  background:#111;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:20px;
+}
+.scan-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.scan-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+.steps{
+  display:flex;flex-direction:column;gap:8px;
+  margin-bottom:20px;text-align:left;
+}
+.step-item{
+  display:flex;align-items:center;gap:10px;
+  background:#111;border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;
+}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--gold);color:#000;
+  font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.step-text{font-size:12px;color:#ccc;line-height:1.4;}
+
+.btn-row{display:flex;gap:10px;margin-bottom:16px;}
+.btn{
+  flex:1;padding:13px;border-radius:12px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:opacity .2s;
+}
+.btn:active{opacity:.8;}
+.btn-download{background:var(--gold);color:#000;}
+.btn-open{background:#1e1e1e;color:var(--text);border:1px solid var(--border);}
+
+.footer{font-size:10px;color:var(--muted);line-height:1.6;}
+.footer b{color:var(--gold);}
+
+/* Loading state */
+.loading{
+  width:240px;height:240px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">🍱</div>
+  <div class="title">AI <span>Jastip</span></div>
+  <div class="subtitle">Scan QR di bawah untuk pesan makan siang<br>Event Kita Kita</div>
+
+  <div id="qrcode"><div class="loading">⏳ Memuat QR...</div></div>
+
+  <div class="scan-box">
+    <div class="scan-title">📲 Cara Pesan</div>
+    <div class="scan-desc">Scan QR Code ini dengan kamera HP kamu, langsung buka menu dan pilih pesanan!</div>
+  </div>
+
+  <div class="steps">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Buka kamera HP → arahkan ke QR Code</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Tap notifikasi → masukkan nama kamu</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Pilih menu → konfirmasi → selesai! ✅</div></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-download" onclick="downloadQR()">⬇️ Download QR</button>
+    <a class="btn btn-open" href="https://daudmuhamad.github.io/Jastip/jastip-user-v2-5.html" target="_blank">🔗 Buka Link</a>
+  </div>
+
+  <div class="footer">
+    <b>AI Jastip</b> — Event Kita Kita<br>
+    Powered by Firebase Realtime Database
+  </div>
+</div>
+
+<script>
+const TARGET = 'https://daudmuhamad.github.io/Jastip/jastip-user-v2-5.html';
+
+// Generate QR
+const qr = new QRCode(document.getElementById('qrcode'), {
+  text: TARGET,
+  width: 240,
+  height: 240,
+  colorDark: '#000000',
+  colorLight: '#ffffff',
+  correctLevel: QRCode.CorrectLevel.H
+});
+
+// Download QR
+function downloadQR() {
+  setTimeout(() => {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) { alert('QR belum siap, coba lagi!'); return; }
+
+    // Create bigger canvas with padding & label
+    const pad = 24;
+    const labelH = 50;
+    const c2 = document.createElement('canvas');
+    c2.width = canvas.width + pad*2;
+    c2.height = canvas.height + pad*2 + labelH;
+    const ctx = c2.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, c2.width, c2.height);
+
+    // QR
+    ctx.drawImage(canvas, pad, pad);
+
+    // Label
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🍱 AI Jastip — Event Kita Kita', c2.width/2, canvas.height + pad + 24);
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#666';
+    ctx.fillText('Scan untuk pesan makan siang', c2.width/2, canvas.height + pad + 44);
+
+    const link = document.createElement('a');
+    link.download = 'QR_AIJastip_EventKitaKita.png';
+    link.href = c2.toDataURL('image/png');
+    link.click();
+  }, 500);
+}
+</script>
+</body>
+</html>
