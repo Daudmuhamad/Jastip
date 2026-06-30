@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import History — AI Jastip</title>
+<style>
+body{background:#0d0d0d;font-family:Inter,sans-serif;color:#f0f0f0;padding:20px;max-width:400px;margin:0 auto;}
+.card{background:#181818;border:1px solid #2c2c2c;border-radius:14px;padding:20px;margin-bottom:16px;}
+h2{color:#F5A623;font-size:18px;margin-bottom:6px;}
+p{font-size:12px;color:#777;margin-bottom:16px;line-height:1.6;}
+.btn{width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;font-family:Inter,sans-serif;}
+.btn-start{background:#F5A623;color:#000;}
+.btn-start:active{opacity:.8;}
+.btn-start:disabled{opacity:.4;cursor:default;}
+.log{background:#111;border:1px solid #222;border-radius:10px;padding:12px;font-size:11px;line-height:1.8;max-height:300px;overflow-y:auto;color:#ccc;}
+.ok{color:#22c55e;}
+.err{color:#ef4444;}
+.info{color:#F5A623;}
+.progress{background:#222;border-radius:6px;height:8px;margin:10px 0;}
+.progress-bar{background:#F5A623;height:8px;border-radius:6px;transition:width .3s;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>📥 Import Data History</h2>
+  <p>Import data pesanan tanggal 16, 17, 22, 26 Juni 2026 ke Firebase. Pastikan koneksi internet aktif.</p>
+  <div class="progress"><div class="progress-bar" id="bar" style="width:0%"></div></div>
+  <div id="status" style="font-size:12px;color:#777;margin-bottom:10px;">Siap import...</div>
+  <button class="btn btn-start" id="startBtn" onclick="startImport()">🚀 Mulai Import Data</button>
+</div>
+<div class="card">
+  <div class="log" id="log">Log akan muncul di sini...<br></div>
+</div>
+
+<script>
+const FB = 'https://jastip-73b53-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+async function fbSet(path, data) {
+  const r = await fetch(FB + path + '.json', {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
+}
+
+function log(msg, type='') {
+  const el = document.getElementById('log');
+  el.innerHTML += `<span class="${type}">${msg}</span><br>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function setProgress(pct, status) {
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('status').textContent = status;
+}
+
+const DATA = {
+  '2026-06-16': [
+    {key:'ainii',   name:'Ainii',   items:[{name:'Ayam Geprek',qty:2,price:12000},{name:'Teh Poci',qty:1,price:5000}],total:29000,payment:'BSI',time:'10.17'},
+    {key:'arull',   name:'Arull',   items:[{name:'Ayam Geprek',qty:1,price:12000},{name:'Otak-Otak Crispy',qty:1,price:5000}],total:17000,payment:'Cash',time:'9.57'},
+    {key:'bokuyy',  name:'Bokuyy',  items:[{name:'Tahu Udang',qty:1,price:5000},{name:'Kentang Mustofa',qty:1,price:5000}],total:10000,payment:'Cash',time:'9.57'},
+    {key:'daud',    name:'Daud',    items:[{name:'Ayam Geprek',qty:1,price:12000},{name:'Jus Jambu',qty:1,price:5000}],total:17000,payment:'Dana',time:'9.5'},
+    {key:'iqbal',   name:'iqbal',   items:[{name:'Sayur Tahu Toge',qty:1,price:5000},{name:'Jus Melon',qty:1,price:10000}],total:15000,payment:'Cash',time:'10.48'},
+    {key:'ma',      name:'Ma',      items:[{name:'Sayur Bayam',qty:2,price:5000}],total:10000,payment:'BSI',time:'9.54'},
+    {key:'pascal',  name:'Pascal',  items:[{name:'Ketoprak',qty:1,price:15000}],total:15000,payment:'Cash',time:'10.01'},
+    {key:'putri',   name:'Putri',   items:[{name:'Usus',qty:1,price:5000},{name:'Piscok',qty:1,price:5000},{name:'Es Kelapa',qty:1,price:5000}],total:15000,payment:'Cash',time:'9.58'},
+    {key:'ridho',   name:'ridho',   items:[{name:'Nasi 1 Porsi',qty:1,price:5000},{name:'Kentang Mustofa',qty:1,price:5000},{name:'Fried Chicken',qty:1,price:9000}],total:19000,payment:'BSI',time:'9.55'},
+  ],
+  '2026-06-17': [
+    {key:'ainii',   name:'Ainii',   items:[{name:'Es Kelapa',qty:1,price:5000}],total:5000,payment:'Cash',time:'10.09'},
+    {key:'alif',    name:'Alif',    items:[{name:'Es Kelapa',qty:1,price:5000}],total:5000,payment:'Dana',time:'10.09'},
+    {key:'araa',    name:'Araa',    items:[{name:'Tahu Udang',qty:1,price:5000},{name:'Sayur Bayam',qty:1,price:5000}],total:10000,payment:'BSI',time:'10.08'},
+    {key:'arull',   name:'Arull',   items:[{name:'Gado-Gado',qty:1,price:15000}],total:15000,payment:'Cash',time:'10.08'},
+    {key:'beni',    name:'Beni',    items:[{name:'Gado-Gado',qty:1,price:15000}],total:15000,payment:'Dana',time:'10.09'},
+    {key:'bokuyy',  name:'Bokuyy',  items:[{name:'Usus',qty:1,price:5000},{name:'Orek Manis',qty:1,price:5000}],total:10000,payment:'Cash',time:'9.55'},
+    {key:'celsi',   name:'celsi',   items:[{name:'Naspad Ayam Bakar',qty:2,price:13000},{name:'Naspad Ayam Cabe Ijo',qty:1,price:13000},{name:'Teh Poci',qty:1,price:5000}],total:44000,payment:'BSI',time:'10.18'},
+    {key:'daud',    name:'Daud',    items:[{name:'Ayam Geprek',qty:1,price:12000},{name:'Piscok',qty:1,price:5000},{name:'Jus Jambu',qty:1,price:5000}],total:22000,payment:'Dana',time:'9.43'},
+    {key:'dedyn',   name:'Dedyn',   items:[{name:'Usus',qty:1,price:5000},{name:'Orek Balado',qty:1,price:5000}],total:10000,payment:'Dana',time:'10.09'},
+    {key:'fauzan',  name:'Fauzan',  items:[{name:'Gado-Gado',qty:1,price:15000},{name:'Es Kelapa',qty:1,price:5000}],total:20000,payment:'BSI',time:'10.09'},
+    {key:'firman',  name:'Firman',  items:[{name:'Pentol',qty:1,price:5000},{name:'Otak-Otak Crispy',qty:1,price:5000}],total:10000,payment:'Cash',time:'10.11'},
+    {key:'ida',     name:'Ida',     items:[{name:'Naspad Ikan Kembung Bakar',qty:1,price:13000},{name:'Tahu+Otak-Otak Crispy',qty:1,price:10000},{name:'Kerupuk Kaleng',qty:1,price:1000}],total:24000,payment:'BSI',time:'10.09'},
+    {key:'iqbal',   name:'iqbal',   items:[{name:'Kentang Mustofa',qty:1,price:5000},{name:'Jus Melon',qty:1,price:10000}],total:15000,payment:'Cash',time:'10.11'},
+    {key:'ma',      name:'Ma',      items:[{name:'Pentol',qty:2,price:5000},{name:'Tahu Crispy',qty:1,price:5000}],total:15000,payment:'BSI',time:'10.09'},
+    {key:'niha',    name:'Niha',    items:[{name:'Orek Balado',qty:1,price:5000},{name:'Jus Jeruk',qty:1,price:5000}],total:10000,payment:'BSI',time:'10.08'},
+    {key:'pascal',  name:'Pascal',  items:[{name:'Naspad Ayam Bakar',qty:1,price:13000}],total:13000,payment:'Cash',time:'9.51'},
+    {key:'putri',   name:'Putri',   items:[{name:'Kentang Mustofa',qty:1,price:5000},{name:'Piscok',qty:1,price:5000},{name:'Es Kelapa',qty:1,price:5000}],total:15000,payment:'Cash',time:'10.08'},
+    {key:'ronaa',   name:'ronaa',   items:[{name:'Piscok',qty:2,price:5000},{name:'Jus Jeruk',qty:1,price:5000}],total:15000,payment:'Cash',time:'10.11'},
+  ],
+  '2026-06-22': [
+    {key:'araa',    name:'Araa',    items:[{name:'Soto Ayam',qty:1,price:15000},{name:'Es Kelapa',qty:1,price:5000}],total:20000,payment:'BSI',time:'10.47'},
+    {key:'arull',   name:'Arull',   items:[{name:'Ayam Geprek',qty:1,price:12000},{name:'Otak-Otak Crispy',qty:1,price:5000}],total:17000,payment:'Dana',time:'10.38'},
+    {key:'beni',    name:'Beni',    items:[{name:'Sayur Capcay',qty:1,price:5000}],total:5000,payment:'Dana',time:'10.37'},
+    {key:'daud',    name:'Daud',    items:[{name:'Orek Balado',qty:1,price:5000},{name:'Sayur Sop',qty:1,price:5000},{name:'Jus Jambu',qty:1,price:5000}],total:15000,payment:'Dana',time:'9.51'},
+    {key:'iqbal',   name:'iqbal',   items:[{name:'Fried Chicken',qty:1,price:9000}],total:9000,payment:'Cash',time:'10.38'},
+    {key:'lala',    name:'Lala',    items:[{name:'Ikan Tongkol',qty:1,price:5000}],total:5000,payment:'Cash',time:'10.45'},
+    {key:'rahmadi', name:'rahmadi', items:[{name:'Ayam Geprek',qty:1,price:12000}],total:12000,payment:'Dana',time:'10.38'},
+    {key:'ronaa',   name:'ronaa',   items:[{name:'Soto Ayam',qty:1,price:15000},{name:'Jus Jeruk',qty:1,price:5000}],total:20000,payment:'BSI',time:'10.48'},
+    {key:'sandi',   name:'Sandi',   items:[{name:'Ikan Tongkol',qty:1,price:5000},{name:'Sayur Bayam',qty:1,price:5000}],total:10000,payment:'BSI',time:'10.41'},
+  ],
+  '2026-06-26': [
+    {key:'araa',    name:'Araa',    items:[{name:'Tahu Udang',qty:1,price:5000},{name:'Sayur Capcay',qty:1,price:5000},{name:'Cimol',qty:1,price:5000}],total:15000,payment:'BSI',time:'10.57'},
+    {key:'beni',    name:'Beni',    items:[{name:'Ikan Tongkol',qty:1,price:5000},{name:'Sayur Tahu Toge',qty:1,price:5000},{name:'Pentol',qty:1,price:5000},{name:'Teh Poci',qty:1,price:5000}],total:20000,payment:'Cash',time:'10.52'},
+    {key:'lala',    name:'Lala',    items:[{name:'Kentang Balado',qty:1,price:5000},{name:'Sayur Bayam',qty:1,price:5000},{name:'Ayam Geprek',qty:1,price:12000}],total:22000,payment:'Dana',time:'10.55'},
+    {key:'rahmadi', name:'rahmadi', items:[{name:'Kentang Balado',qty:1,price:5000}],total:5000,payment:'Cash',time:'10.46'},
+  ],
+};
+
+async function startImport() {
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Importing...';
+
+  const allDates = Object.keys(DATA);
+  const totalOrders = allDates.reduce((a,d) => a + DATA[d].length, 0);
+  let done = 0, ok = 0, fail = 0;
+
+  log('🚀 Mulai import ' + totalOrders + ' orders...', 'info');
+
+  for (const date of allDates) {
+    log('📅 ' + date + ' — ' + DATA[date].length + ' orang', 'info');
+    for (const order of DATA[date]) {
+      try {
+        const orderData = {...order, date, key: undefined};
+        delete orderData.key;
+        await fbSet('/history/' + date + '/orders/' + order.key, orderData);
+        log('  ✅ ' + order.name + ' — Rp ' + order.total.toLocaleString('id-ID'), 'ok');
+        ok++;
+      } catch(e) {
+        log('  ❌ GAGAL: ' + order.name + ' — ' + e.message, 'err');
+        fail++;
+      }
+      done++;
+      setProgress(Math.round(done/totalOrders*100), done + '/' + totalOrders + ' orders');
+      await new Promise(r => setTimeout(r, 80));
+    }
+  }
+
+  setProgress(100, 'Selesai!');
+  log('', '');
+  log('═══════════════════════', 'info');
+  log('✅ Berhasil: ' + ok + ' orders', 'ok');
+  if (fail > 0) log('❌ Gagal: ' + fail + ' orders', 'err');
+  log('📊 Buka link statistik untuk lihat data!', 'info');
+
+  btn.textContent = ok === totalOrders ? '✅ Import Selesai!' : '⚠️ Ada yang Gagal';
+  btn.style.background = ok === totalOrders ? '#22c55e' : '#ef4444';
+  btn.style.color = '#fff';
+}
+</script>
+</body>
+</html>
